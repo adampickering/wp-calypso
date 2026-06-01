@@ -41,6 +41,7 @@ describe( 'BlockNoteMentionAutocomplete', () => {
 	const MENTION_TEXT = '@ai';
 	const PILL_CLASS = 'bigsky-mention-pill';
 	const NOTE_CLASS = 'editor-collab-sidebar-panel__user-comment';
+	const NOTE_CONTENT_CLASS = 'editor-collab-sidebar-panel__note-content';
 	const STYLE_ID = 'bigsky-mention-autocomplete-styles';
 
 	let originalMutationObserver: typeof MutationObserver;
@@ -260,31 +261,32 @@ describe( 'BlockNoteMentionAutocomplete', () => {
 				} );
 			} );
 
-			it( 'marks element as processed to prevent re-styling', async () => {
-				const noteDiv = createNoteElement( `Test ${ MENTION_TEXT } note` );
+			it( 'wraps @ai mentions in newer note content elements', async () => {
+				const noteDiv = createNoteElement( `Test ${ MENTION_TEXT } note`, NOTE_CONTENT_CLASS );
 
 				render( <BlockNoteMentionAutocomplete /> );
 
 				await waitFor( () => {
-					expect( noteDiv.dataset.mentionsStyled ).toBe( 'true' );
+					const pill = noteDiv.querySelector( `.${ PILL_CLASS }` );
+					expect( pill ).toBeInTheDocument();
+					expect( pill!.textContent ).toBe( MENTION_TEXT );
 				} );
 			} );
 
-			it( 'skips already processed elements', async () => {
+			it( 'does not duplicate existing mention pills', async () => {
 				const noteDiv = createNoteElement( `Test ${ MENTION_TEXT } note` );
-				noteDiv.dataset.mentionsStyled = 'true';
 
-				render( <BlockNoteMentionAutocomplete /> );
+				const firstRender = render( <BlockNoteMentionAutocomplete /> );
 
-				// Wait a bit
-				await waitFor(
-					() => {
-						// Should not have pill (already marked as processed)
-						const pill = noteDiv.querySelector( `.${ PILL_CLASS }` );
-						expect( pill ).not.toBeInTheDocument();
-					},
-					{ timeout: 500 }
-				);
+				await waitFor( () => {
+					expect( noteDiv.querySelectorAll( `.${ PILL_CLASS }` ) ).toHaveLength( 1 );
+				} );
+
+				firstRender.rerender( <BlockNoteMentionAutocomplete /> );
+
+				await waitFor( () => {
+					expect( noteDiv.querySelectorAll( `.${ PILL_CLASS }` ) ).toHaveLength( 1 );
+				} );
 			} );
 
 			it( 'skips elements without @ai mentions', async () => {
@@ -296,8 +298,6 @@ describe( 'BlockNoteMentionAutocomplete', () => {
 					() => {
 						const pill = noteDiv.querySelector( '.bigsky-mention-pill' );
 						expect( pill ).not.toBeInTheDocument();
-						// Should not mark as processed
-						expect( noteDiv.dataset.mentionsStyled ).toBeUndefined();
 					},
 					{ timeout: 500 }
 				);

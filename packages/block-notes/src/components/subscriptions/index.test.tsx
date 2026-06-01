@@ -257,6 +257,7 @@ describe( 'BlockNoteSubscriptions', () => {
 				parentNoteId: 0,
 				sessionId: 'test-session-id-123',
 			} );
+			expect( mockHasAgent ).toHaveBeenCalledWith( 'wp-orchestrator' );
 		} );
 
 		it( 'ignores notes without @ai mentions', async () => {

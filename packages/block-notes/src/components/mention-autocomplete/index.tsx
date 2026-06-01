@@ -3,6 +3,7 @@ import { store as editorStore } from '@wordpress/editor';
 import { useCallback, useEffect, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { hasAiMention, splitByAiMention } from '../../utils/content';
+import { BLOCK_NOTE_CONTENT_SELECTOR } from '../../utils/selectors';
 
 export const MAX_RETRIES = 5;
 export const RETRY_DELAY_MS = 200;
@@ -80,14 +81,10 @@ function BlockNoteMentionAutocomplete() {
 	const styleMentionsInNotes = useCallback( () => {
 		// Find all notes content elements
 		// Target the specific div structure for WordPress block notes
-		const noteElements = document.querySelectorAll( '.editor-collab-sidebar-panel__user-comment' );
+		const noteElements = document.querySelectorAll( BLOCK_NOTE_CONTENT_SELECTOR );
 
 		noteElements.forEach( ( el ) => {
 			const element = el as HTMLElement;
-			// Skip if already processed
-			if ( element.dataset.mentionsStyled === 'true' ) {
-				return;
-			}
 
 			// Skip if element doesn't have text content with mentions
 			if ( ! element.textContent || ! hasAiMention( element.textContent ) ) {
@@ -102,6 +99,12 @@ function BlockNoteMentionAutocomplete() {
 
 			while ( ( node = walker.nextNode() ) ) {
 				const text = node.nodeValue;
+				const parentElement = node.parentElement;
+
+				if ( parentElement?.closest( '.bigsky-mention-pill' ) ) {
+					continue;
+				}
+
 				// Match @ai
 				if ( text && hasAiMention( text ) ) {
 					nodesToReplace.push( node );
@@ -134,9 +137,6 @@ function BlockNoteMentionAutocomplete() {
 					textNode.parentNode.replaceChild( fragment, textNode );
 				}
 			} );
-
-			// Mark as processed
-			element.dataset.mentionsStyled = 'true';
 		} );
 	}, [] );
 

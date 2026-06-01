@@ -17,6 +17,7 @@ import '@testing-library/jest-dom';
 
 // Mock WordPress dependencies
 const mockGetCurrentPostId = jest.fn();
+const mockGetEntityRecords = jest.fn();
 
 jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn( ( callback: any ) => {
@@ -26,10 +27,19 @@ jest.mock( '@wordpress/data', () => ( {
 					getCurrentPostId: mockGetCurrentPostId,
 				};
 			}
+			if ( storeName === 'core' ) {
+				return {
+					getEntityRecords: mockGetEntityRecords,
+				};
+			}
 			return {};
 		};
 		return callback( select );
 	} ),
+} ) );
+
+jest.mock( '@wordpress/core-data', () => ( {
+	store: 'core',
 } ) );
 
 jest.mock( '@wordpress/editor', () => ( {
@@ -41,7 +51,9 @@ describe( 'BlockNoteThinkingIndicator', () => {
 	const INDICATOR_CLASS = 'bigsky-thinking-indicator';
 	const INDICATOR_TEXT_CLASS = 'bigsky-thinking-text';
 	const NOTE_CLASS = 'editor-collab-sidebar-panel__user-comment';
+	const NOTE_CONTENT_CLASS = 'editor-collab-sidebar-panel__note-content';
 	const THREAD_ID_PREFIX = 'comment-thread-';
+	const NOTE_THREAD_ID_PREFIX = 'note-thread-';
 	const STYLE_ID = 'bigsky-thinking-indicator-styles';
 
 	let originalMutationObserver: typeof MutationObserver;
@@ -49,6 +61,7 @@ describe( 'BlockNoteThinkingIndicator', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockGetCurrentPostId.mockReturnValue( 123 );
+		mockGetEntityRecords.mockReturnValue( null );
 
 		// Clean up DOM
 		document.body.innerHTML = '';
@@ -73,14 +86,21 @@ describe( 'BlockNoteThinkingIndicator', () => {
 	 * @param {string[]} noteTexts - Array of note text content
 	 * @returns The thread container element
 	 */
-	const createThread = ( threadId: number, noteTexts: string[] ) => {
+	const createThread = (
+		threadId: number,
+		noteTexts: string[],
+		{
+			noteClass = NOTE_CLASS,
+			threadIdPrefix = THREAD_ID_PREFIX,
+		}: { noteClass?: string; threadIdPrefix?: string } = {}
+	) => {
 		const threadContainer = document.createElement( 'div' );
-		threadContainer.id = `${ THREAD_ID_PREFIX }${ threadId }`;
+		threadContainer.id = `${ threadIdPrefix }${ threadId }`;
 		document.body.appendChild( threadContainer );
 
 		noteTexts.forEach( ( text: string ) => {
 			const noteDiv = document.createElement( 'div' );
-			noteDiv.className = NOTE_CLASS;
+			noteDiv.className = noteClass;
 			noteDiv.textContent = text;
 			threadContainer.appendChild( noteDiv );
 		} );
@@ -139,6 +159,20 @@ describe( 'BlockNoteThinkingIndicator', () => {
 				} );
 
 				unmount();
+			} );
+
+			it( 'applies thinking indicator to newer note thread markup', async () => {
+				const thread = createThread( 1, [ 'New markup note with @ai' ], {
+					noteClass: NOTE_CONTENT_CLASS,
+					threadIdPrefix: NOTE_THREAD_ID_PREFIX,
+				} );
+
+				render( <BlockNoteThinkingIndicator /> );
+
+				await waitFor( () => {
+					const indicator = thread.querySelector( `.${ INDICATOR_CLASS }` );
+					expect( indicator ).toBeInTheDocument();
+				} );
 			} );
 
 			it( 'does not apply indicator when last note has no @ai mention', async () => {
@@ -266,6 +300,29 @@ describe( 'BlockNoteThinkingIndicator', () => {
 				await waitFor( () => {
 					expect( thread.querySelector( `.${ INDICATOR_CLASS }` ) ).not.toBeInTheDocument();
 				} );
+			} );
+
+			it( 'does not show indicator when latest @ai note is already processed', async () => {
+				mockGetEntityRecords.mockReturnValue( [
+					{
+						id: 1,
+						parent: 0,
+						content: { rendered: 'Note with @ai' },
+						meta: {
+							bigsky_ai_processed_date: '2026-06-01T18:45:00.000Z',
+						},
+					},
+				] );
+				const thread = createThread( 1, [ 'Note with @ai' ] );
+
+				render( <BlockNoteThinkingIndicator /> );
+
+				await waitFor(
+					() => {
+						expect( thread.querySelector( `.${ INDICATOR_CLASS }` ) ).not.toBeInTheDocument();
+					},
+					{ timeout: 500 }
+				);
 			} );
 		} );
 
