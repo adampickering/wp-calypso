@@ -274,19 +274,48 @@ describe( 'BlockNoteMentionAutocomplete', () => {
 			} );
 
 			it( 'does not duplicate existing mention pills', async () => {
-				const noteDiv = createNoteElement( `Test ${ MENTION_TEXT } note` );
+				const observerCallbacks: MutationCallback[] = [];
+				const observeMock = jest.fn();
+				const disconnectMock = jest.fn();
+				window.MutationObserver = jest.fn( function (
+					this: Pick< MutationObserver, 'observe' | 'disconnect' >,
+					callback: MutationCallback
+				) {
+					observerCallbacks.push( callback );
+					this.observe = observeMock;
+					this.disconnect = disconnectMock;
+				} ) as unknown as typeof MutationObserver;
 
-				const firstRender = render( <BlockNoteMentionAutocomplete /> );
+				const noteText = `Test ${ MENTION_TEXT } note`;
+				const noteDiv = createNoteElement( noteText );
+
+				const { unmount } = render( <BlockNoteMentionAutocomplete /> );
 
 				await waitFor( () => {
 					expect( noteDiv.querySelectorAll( `.${ PILL_CLASS }` ) ).toHaveLength( 1 );
 				} );
 
-				firstRender.rerender( <BlockNoteMentionAutocomplete /> );
+				const observerCallback = observerCallbacks[ 0 ];
+				expect( observerCallback ).toBeInstanceOf( Function );
+
+				act( () => {
+					observerCallback?.( [], null as unknown as MutationObserver );
+				} );
 
 				await waitFor( () => {
 					expect( noteDiv.querySelectorAll( `.${ PILL_CLASS }` ) ).toHaveLength( 1 );
 				} );
+
+				act( () => {
+					noteDiv.textContent = noteText;
+					observerCallback?.( [], null as unknown as MutationObserver );
+				} );
+
+				await waitFor( () => {
+					expect( noteDiv.querySelectorAll( `.${ PILL_CLASS }` ) ).toHaveLength( 1 );
+				} );
+
+				unmount();
 			} );
 
 			it( 'skips elements without @ai mentions', async () => {

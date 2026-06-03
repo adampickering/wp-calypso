@@ -12,6 +12,7 @@ export const PLACEHOLDER_TEXT = sprintf(
 	__( 'Leave a note. Type %s to use AI assistance.', __i18n_text_domain__ ),
 	'@ai'
 );
+const MENTIONS_STYLED_HTML_DATA_KEY = 'mentionsStyledHtml';
 
 /**
  * BlockNoteMentionAutocomplete Component
@@ -85,9 +86,16 @@ function BlockNoteMentionAutocomplete() {
 
 		noteElements.forEach( ( el ) => {
 			const element = el as HTMLElement;
+			const textContent = element.textContent;
+			const htmlContent = element.innerHTML;
 
 			// Skip if element doesn't have text content with mentions
-			if ( ! element.textContent || ! hasAiMention( element.textContent ) ) {
+			if ( ! textContent || ! hasAiMention( textContent ) ) {
+				delete element.dataset[ MENTIONS_STYLED_HTML_DATA_KEY ];
+				return;
+			}
+
+			if ( element.dataset[ MENTIONS_STYLED_HTML_DATA_KEY ] === htmlContent ) {
 				return;
 			}
 
@@ -109,6 +117,11 @@ function BlockNoteMentionAutocomplete() {
 				if ( text && hasAiMention( text ) ) {
 					nodesToReplace.push( node );
 				}
+			}
+
+			if ( nodesToReplace.length === 0 ) {
+				element.dataset[ MENTIONS_STYLED_HTML_DATA_KEY ] = element.innerHTML;
+				return;
 			}
 
 			// Replace text nodes with styled content
@@ -137,6 +150,8 @@ function BlockNoteMentionAutocomplete() {
 					textNode.parentNode.replaceChild( fragment, textNode );
 				}
 			} );
+
+			element.dataset[ MENTIONS_STYLED_HTML_DATA_KEY ] = element.innerHTML;
 		} );
 	}, [] );
 
