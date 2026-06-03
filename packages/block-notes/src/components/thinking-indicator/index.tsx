@@ -28,7 +28,7 @@ function getNoteContent( note: NoteEntity ): string {
 }
 
 function getThreadRootNoteId( threadContainer: Element ): number | null {
-	const match = threadContainer.id.match( /^(?:note|comment)-thread-(\d+)$/ );
+	const match = threadContainer.id.match( /^(?:note|comment)-thread-(\d+)(?:\D.*)?$/ );
 	if ( ! match ) {
 		return null;
 	}

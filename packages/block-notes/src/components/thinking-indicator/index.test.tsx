@@ -92,10 +92,11 @@ describe( 'BlockNoteThinkingIndicator', () => {
 		{
 			noteClass = NOTE_CLASS,
 			threadIdPrefix = THREAD_ID_PREFIX,
-		}: { noteClass?: string; threadIdPrefix?: string } = {}
+			threadIdSuffix = '',
+		}: { noteClass?: string; threadIdPrefix?: string; threadIdSuffix?: string } = {}
 	) => {
 		const threadContainer = document.createElement( 'div' );
-		threadContainer.id = `${ threadIdPrefix }${ threadId }`;
+		threadContainer.id = `${ threadIdPrefix }${ threadId }${ threadIdSuffix }`;
 		document.body.appendChild( threadContainer );
 
 		noteTexts.forEach( ( text: string ) => {
@@ -165,6 +166,29 @@ describe( 'BlockNoteThinkingIndicator', () => {
 				const thread = createThread( 1, [ 'New markup note with @ai' ], {
 					noteClass: NOTE_CONTENT_CLASS,
 					threadIdPrefix: NOTE_THREAD_ID_PREFIX,
+				} );
+
+				render( <BlockNoteThinkingIndicator /> );
+
+				await waitFor( () => {
+					const indicator = thread.querySelector( `.${ INDICATOR_CLASS }` );
+					expect( indicator ).toBeInTheDocument();
+				} );
+			} );
+
+			it( 'applies thinking indicator to suffixed thread ids when pending thread data is available', async () => {
+				mockGetEntityRecords.mockReturnValue( [
+					{
+						id: 1,
+						parent: 0,
+						content: { rendered: 'Note with @ai' },
+						meta: {},
+					},
+				] );
+				const thread = createThread( 1, [ 'New markup note with @ai' ], {
+					noteClass: NOTE_CONTENT_CLASS,
+					threadIdPrefix: NOTE_THREAD_ID_PREFIX,
+					threadIdSuffix: '-editor-canvas',
 				} );
 
 				render( <BlockNoteThinkingIndicator /> );
