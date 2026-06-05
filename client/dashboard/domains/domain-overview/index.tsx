@@ -6,7 +6,7 @@ import {
 	domainMappingStatusQuery,
 } from '@automattic/api-queries';
 import { formatCurrency } from '@automattic/number-formatters';
-import { Badge } from '@automattic/ui';
+import { Badge } from '@wordpress/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { Button, __experimentalHStack as HStack } from '@wordpress/components';
