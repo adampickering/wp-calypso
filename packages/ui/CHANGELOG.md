@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Breaking Changes
+
+- `Badge`: Remove component. Use `Badge` from `@wordpress/ui` instead.
+
 ## 1.0.2
 
 ### Enhancements
