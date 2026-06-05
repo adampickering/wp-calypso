@@ -1,8 +1,8 @@
 import { LogType, PHPLog, ServerLog } from '@automattic/api-core';
 import { formatNumber } from '@automattic/number-formatters';
-import { Badge } from '@automattic/ui';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { Badge } from '@wordpress/ui';
 import { useMemo } from 'react';
 import { useLocale } from '../../../app/locale';
 import { formatDateCell, getDateTimeLabel } from '../../logs/utils';

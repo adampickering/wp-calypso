@@ -1,9 +1,9 @@
-import { Badge } from '@automattic/ui';
 import {
 	__experimentalHStack as HStack,
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { Badge } from '@wordpress/ui';
 import { Fragment } from 'react';
 import { Card, CardBody, CardDivider } from '../../components/card';
 import InlineSupportLink from '../../components/inline-support-link';
