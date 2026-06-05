@@ -1,4 +1,3 @@
-import { Badge } from '@automattic/ui';
 import {
 	Card,
 	CardBody,
@@ -11,6 +10,7 @@ import {
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { useState, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Badge } from '@wordpress/ui';
 import { MARKETPLACE_TYPE_SESSION_STORAGE_KEY } from 'calypso/a8c-for-agencies/sections/marketplace/hoc/with-marketplace-type';
 import { ButtonStack } from 'calypso/dashboard/components/button-stack';
 import { useDispatch } from 'calypso/state';

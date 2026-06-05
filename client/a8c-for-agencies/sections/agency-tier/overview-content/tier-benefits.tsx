@@ -1,4 +1,3 @@
-import { Badge } from '@automattic/ui';
 import {
 	Card,
 	CardHeader,
@@ -12,6 +11,7 @@ import {
 import { useViewportMatch } from '@wordpress/compose';
 import { DataViews } from '@wordpress/dataviews';
 import { __, sprintf } from '@wordpress/i18n';
+import { Badge } from '@wordpress/ui';
 import clsx from 'clsx';
 import useScheduleCall from 'calypso/a8c-for-agencies/hooks/use-schedule-call';
 import { SectionHeader } from 'calypso/dashboard/components/section-header';
