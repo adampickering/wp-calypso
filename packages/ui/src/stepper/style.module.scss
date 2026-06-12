@@ -33,8 +33,9 @@
 	background: var( --wpds-color-bg-surface-neutral-strong );
 }
 
-// Current step (number variant): solid filled circle
-.indicator.is-current[data-indicator-variant='number'] {
+// Current step (number variant): solid filled circle. Completed/error render
+// icons even when current, so they are excluded from the circle fill.
+.indicator.is-current[data-indicator-variant='number']:not( .is-completed, .is-error ) {
 	border-color: var( --wpds-color-fg-content-neutral );
 	background: var( --wpds-color-fg-content-neutral );
 	color: var( --wpds-color-bg-surface-neutral-strong );
@@ -106,7 +107,7 @@
 
 		// Only number-variant non-current steps still draw a CSS circle;
 		// the current step keeps its solid fill on hover.
-		.indicator[data-indicator-variant='number']:not( .is-current ) {
+		.indicator[data-indicator-variant='number']:not( .is-current, .is-completed, .is-error ) {
 			border-color: var( --wpds-color-fg-interactive-brand );
 		}
 
