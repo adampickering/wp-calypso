@@ -247,11 +247,11 @@ export const getOdieInitialMessage = (
 	return {
 		content: `**${ sprintf(
 			/* translators: %(name)s: the user's display name */
-			__( 'Howdy %(name)s 👋', __i18n_text_domain__ ),
+			__( 'Howdy %(name)s', __i18n_text_domain__ ),
 			{
 				name: displayName || 'there',
 			}
-		) }** \n\n ${ __(
+		).trim() } 👋** \n\n ${ __(
 			"I'm your personal AI assistant. I can help with any questions about your site or account.",
 			__i18n_text_domain__
 		) }`,
