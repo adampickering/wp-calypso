@@ -33,7 +33,7 @@
 	},
 	"dependencies": {
 		"@automattic/interpolate-components": "workspace:^",
-		"@babel/runtime": "^7.27.1",
+		"@babel/runtime": "^7.29.7",
 		"@tannin/sprintf": "^1.1.0",
 		"@wordpress/compose": "patch:@wordpress/compose@npm%3A8.1.0#~/.yarn/patches/@wordpress-compose-npm-8.1.0-ea108e3129.patch",
 		"debug": "^4.4.1",
