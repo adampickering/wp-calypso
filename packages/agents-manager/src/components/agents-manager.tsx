@@ -14,12 +14,12 @@ import { useEmptyViewSuggestions } from '../hooks/use-empty-view-suggestions';
 import { AGENTS_MANAGER_STORE } from '../stores';
 import { clearSessionId, getOrCreateSessionId } from '../utils/agent-session';
 import { createAgentConfig } from '../utils/create-agent-config';
-import { isReaderChatAgent } from '../utils/is-reader-chat-agent';
 import {
 	loadExternalProviders,
 	type ImageUploadHook,
 	type LoadedProviders,
 } from '../utils/load-external-providers';
+import { usesLocalStatePersistence } from '../utils/uses-local-state-persistence';
 import AgentDock from './agent-dock';
 import { PersistentRouter } from './persistent-router';
 import type { JSX } from 'react';
@@ -103,16 +103,18 @@ function AgentSetup( {
 
 	// Restore the session ID. Priority:
 	//   1. Router state (calypso navigation carries sessionId on resume).
-	//   2. localStorage (reader-chat on blog frontends, where there's no
-	//      router state on fresh page loads). We persist client-side so
-	//      the same session_id flows with every request.
+	//   2. localStorage — for client-persisted hosts with no router state on a
+	//      fresh page load (reader-chat blogs, and any host that sets
+	//      `persistStateLocally`, e.g. the logged-out WooCommerce storefront whose
+	//      per-user open-state can't be restored). We persist client-side so the
+	//      same session_id flows with every request.
 	//   3. Generate a new client-side UUID, persist, and use it.
 	// This is more robust than relying on agenttic-client's own sessionIdStorageKey
 	// write — that fires after the server returns a sessionId, which can be
 	// skipped if the response shape doesn't match what the client parses.
 	const sessionId =
 		( ! isNewChat && state?.sessionId ) ||
-		( isReaderChatAgent( agentId ) ? getOrCreateSessionId( isNewChat, agentId ) : '' );
+		( usesLocalStatePersistence( agentId ) ? getOrCreateSessionId( isNewChat, agentId ) : '' );
 
 	useEffect( () => {
 		// Wait for the agent config to stabilize before initializing.

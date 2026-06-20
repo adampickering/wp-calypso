@@ -2,23 +2,25 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 import { useAgentsManagerContext } from '../contexts';
 import { AGENTS_MANAGER_STORE } from '../stores';
-import { isReaderChatAgent } from '../utils/is-reader-chat-agent';
+import { usesLocalStatePersistence } from '../utils/uses-local-state-persistence';
 import type { AgentsManagerSelect } from '@automattic/data-stores';
 
 /**
- * Persists the reader-chat open state across page navigations.
+ * Persists the chat open state across page navigations for client-persisted
+ * hosts.
  *
- * Reader-chat runs on public blog frontends where `AGENTS_MANAGER_STORE` is
- * in-memory only, so a fresh page load resets `isOpen` to false. Mirror the
- * flag in `localStorage`: restore it on first mount and write it on every
- * toggle. No-op for other agents, whose state is server-backed.
+ * Reader-chat (public blogs) and `persistStateLocally` hosts (e.g. the
+ * logged-out storefront shopper) run where `AGENTS_MANAGER_STORE` is in-memory
+ * only and the per-user server open-state can't be restored, so a fresh page
+ * load resets `isOpen` to false. Mirror the flag in `localStorage`: restore it
+ * on first mount and write it on every toggle. No-op for server-backed agents.
  */
 export default function useReaderChatPersistence(): void {
 	const { agentConfig } = useAgentsManagerContext();
-	// No-op until the agent config is ready; `isReaderChatAgent( '' )` is false.
+	// No-op until the agent config is ready; `usesLocalStatePersistence( '' )` is false.
 	const agentId = agentConfig?.agentId ?? '';
 
-	const isReaderChat = isReaderChatAgent( agentId );
+	const persistsLocally = usesLocalStatePersistence( agentId );
 	const storageKey = `jetpack-reader-chat-open-${ agentId }`;
 
 	const { setIsOpen } = useDispatch( AGENTS_MANAGER_STORE );
@@ -29,7 +31,7 @@ export default function useReaderChatPersistence(): void {
 
 	// Restore on first mount.
 	useEffect( () => {
-		if ( ! isReaderChat ) {
+		if ( ! persistsLocally ) {
 			return;
 		}
 
@@ -45,7 +47,7 @@ export default function useReaderChatPersistence(): void {
 
 	// Write on every toggle.
 	useEffect( () => {
-		if ( ! isReaderChat ) {
+		if ( ! persistsLocally ) {
 			return;
 		}
 
@@ -58,5 +60,5 @@ export default function useReaderChatPersistence(): void {
 		} catch {
 			// ignore
 		}
-	}, [ isOpen, isReaderChat, storageKey ] );
+	}, [ isOpen, persistsLocally, storageKey ] );
 }
