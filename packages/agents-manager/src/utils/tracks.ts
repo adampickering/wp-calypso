@@ -10,8 +10,9 @@
 import { recordTracksEvent } from '@automattic/calypso-analytics';
 import { select } from '@wordpress/data';
 import { getSessionId } from './agent-session';
-import { isReaderChatAgent, isReaderChatHost } from './is-reader-chat-agent';
+import { isReaderChatHost } from './is-reader-chat-agent';
 import { getResolvedAgentId } from './resolved-agent-id';
+import { usesLocalStatePersistence } from './uses-local-state-persistence';
 
 type TracksProps = Record< string, unknown >;
 
@@ -90,8 +91,13 @@ function getBigSkyPageProps(): TracksProps {
  * dashboards keep working.
  */
 export function recordBigSkyTracksEvent( eventName: string, props: TracksProps = {} ): void {
-	if ( isReaderChatAgent( getResolvedAgentId() ) ) {
-		return; // Big Sky parity events are editor-only; never on reader-chat.
+	// Big Sky parity events are editor-only. Skip them on public, non-editor
+	// surfaces — reader-chat and the storefront shopper (both reported by
+	// `usesLocalStatePersistence`). Besides being irrelevant there,
+	// getBigSkyPageProps() reads the site record (`/wp/v2/settings`), an
+	// admin-only endpoint that 401s for an anonymous shopper.
+	if ( usesLocalStatePersistence( getResolvedAgentId() ) ) {
+		return;
 	}
 
 	const bigSky = getBigSkyTracksData();
