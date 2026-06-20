@@ -35,6 +35,7 @@ import { getOrchestratorErrorMessage } from '../../utils/orchestrator-error-mess
 import { persistLastActivity } from '../../utils/persist-last-activity';
 import { getReaderChatErrorMessage } from '../../utils/reader-chat-error-message';
 import { recordBigSkyTracksEvent } from '../../utils/tracks';
+import { usesLocalStatePersistence } from '../../utils/uses-local-state-persistence';
 import AgentChat from '../agent-chat';
 import { type Options as ChatHeaderOptions } from '../chat-header';
 import type { BigSkyMessage } from '../../types';
@@ -280,18 +281,16 @@ export default function OrchestratorChat( {
 				await onSubmit( message );
 			}
 			consumeNextMessageExternalContextEntries();
-			if ( isReaderChat ) {
+			// Clear the "fresh session" flag after the first round-trip for every
+			// client-persisted surface (reader-chat AND the storefront shopper), so a
+			// subsequent reload knows there's a conversation to fetch. Gating this on
+			// reader-chat alone would leave the storefront's flag stuck "fresh" and it
+			// would never restore.
+			if ( usesLocalStatePersistence( agentConfig?.agentId ) ) {
 				markSessionUsed( agentConfig?.agentId );
 			}
 		},
-		[
-			agentConfig?.agentId,
-			isReaderChat,
-			onSubmit,
-			pendingImages.length,
-			siteKey,
-			uploadImagesToWordPress,
-		]
+		[ agentConfig?.agentId, onSubmit, pendingImages.length, siteKey, uploadImagesToWordPress ]
 	);
 
 	const setChatInput = useCallback( ( value: string ) => {
