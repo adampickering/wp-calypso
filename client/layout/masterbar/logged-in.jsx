@@ -318,6 +318,7 @@ class MasterbarLoggedIn extends Component {
 										label: translate( 'Themes' ),
 										url: wpcomLink( '/themes' ),
 										openInNewTab: true,
+										className: 'masterbar__item-subitems-item-external',
 										onClick: () =>
 											this.props.recordTracksEvent( 'calypso_masterbar_themes_clicked' ),
 									},
@@ -333,6 +334,7 @@ class MasterbarLoggedIn extends Component {
 										label: translate( 'Themes' ),
 										url: wpcomLink( '/themes' ),
 										openInNewTab: true,
+										className: 'masterbar__item-subitems-item-external',
 										onClick: () =>
 											this.props.recordTracksEvent( 'calypso_masterbar_themes_clicked' ),
 									},
