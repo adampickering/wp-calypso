@@ -18,6 +18,7 @@ import { hasAiChatEntryButton } from '../../hooks/use-admin-bar-integration';
 import { AGENTS_MANAGER_STORE } from '../../stores';
 import { getAgentsManagerInlineData } from '../../utils/get-agents-manager-inline-data';
 import { isReaderChatHost } from '../../utils/is-reader-chat-agent';
+import { isShopperHost } from '../../utils/is-shopper-agent';
 import { recordBigSkyTracksEvent } from '../../utils/tracks';
 import ChatHeader, { type Options as ChatHeaderOptions } from '../chat-header';
 import ChatMessageSkeleton from '../chat-message-skeleton';
@@ -122,6 +123,9 @@ function getEmptyViewHeading(): string {
 	if ( isReaderChatHost() ) {
 		return __( 'Ask me anything about this blog.', '__i18n_text_domain__' );
 	}
+	if ( isShopperHost() ) {
+		return __( 'Hi! Looking for something?', '__i18n_text_domain__' );
+	}
 	return __( 'Howdy! How can I help you today?', '__i18n_text_domain__' );
 }
 
@@ -132,6 +136,12 @@ function getEmptyViewHelp(): string {
 	}
 	if ( isReaderChatHost() ) {
 		return __( 'Or type your own question below.', '__i18n_text_domain__' );
+	}
+	if ( isShopperHost() ) {
+		return __(
+			'Ask about products, orders, or shipping — or pick one below.',
+			'__i18n_text_domain__'
+		);
 	}
 	return __( 'Got a different request? Ask away.', '__i18n_text_domain__' );
 }
@@ -275,7 +285,7 @@ export default function AgentChat( {
 			freeDrag={ ! isDocked }
 			suggestions={ suggestions }
 			clearSuggestions={ clearSuggestions }
-			onSuggestionClick={ onSuggestionClick }
+			onSuggestionClick={ isShopperHost() ? undefined : onSuggestionClick }
 			floatingChatState={ floatingChatState }
 			onClose={ onClose }
 			onExpand={ onExpand }
@@ -294,7 +304,7 @@ export default function AgentChat( {
 						heading={ getEmptyViewHeading() }
 						help={ emptyViewSuggestions.length > 0 ? getEmptyViewHelp() : undefined }
 						suggestions={ emptyViewSuggestions }
-						onSuggestionClick={ onSuggestionClick }
+						onSuggestionClick={ isShopperHost() ? undefined : onSuggestionClick }
 						icon={ <AI size={ 32 } /> }
 					/>
 				)
