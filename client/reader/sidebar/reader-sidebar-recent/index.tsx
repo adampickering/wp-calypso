@@ -1,5 +1,6 @@
 import './style.scss';
 import page from '@automattic/calypso-router';
+import { Count } from '@automattic/components';
 import clsx from 'clsx';
 import { localize } from 'i18n-calypso';
 import React, { useState } from 'react';
@@ -61,6 +62,7 @@ const ReaderSidebarRecent = ( {
 }: Props ): React.JSX.Element => {
 	const [ showAllSites, setShowAllSites ] = useState( false );
 	const sites = useSubscribedSites();
+	const totalUnseenCount = sites.reduce( ( sum, site ) => sum + ( site.unseen_count ?? 0 ), 0 );
 	const selectedSiteFeedId = useSelector< AppState, number | null >( getSelectedRecentFeedId );
 	const moment = useLocalizedMoment();
 	const recordReaderTracksEvent = useRecordReaderTracksEvent();
@@ -111,10 +113,10 @@ const ReaderSidebarRecent = ( {
 			title={ translate( 'Recent' ) }
 			customIcon={ <ReaderIcon className="sidebar__menu-icon" viewBox="0 0 24 11" /> }
 			disableFlyout
-			className={ clsx( 'reader-sidebar-recent', className, {
+			className={ clsx( 'reader-sidebar-recent', 'has-counts', className, {
 				'sidebar__menu--selected': ! isOpen && isRecentStream,
 			} ) }
-			count={ undefined }
+			count={ totalUnseenCount > 0 ? totalUnseenCount : undefined }
 			icon={ null }
 			materialIcon={ null }
 			materialIconStyle={ null }
@@ -128,6 +130,7 @@ const ReaderSidebarRecent = ( {
 				>
 					<AllIcon />
 					<span>{ translate( 'All' ) }</span>
+					{ totalUnseenCount > 0 && <Count count={ totalUnseenCount } compact /> }
 				</MenuItemLink>
 			</MenuItem>
 
@@ -156,6 +159,7 @@ const ReaderSidebarRecent = ( {
 										</span>
 									) }
 								</span>
+								{ site.unseen_count > 0 && <Count count={ site.unseen_count } compact /> }
 							</MenuItemLink>
 						</AutoDirection>
 					</MenuItem>
