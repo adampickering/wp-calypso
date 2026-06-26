@@ -285,7 +285,7 @@ export default function AgentChat( {
 			freeDrag={ ! isDocked }
 			suggestions={ suggestions }
 			clearSuggestions={ clearSuggestions }
-			onSuggestionClick={ isShopperHost() ? undefined : onSuggestionClick }
+			onSuggestionClick={ onSuggestionClick }
 			floatingChatState={ floatingChatState }
 			onClose={ onClose }
 			onExpand={ onExpand }
@@ -304,7 +304,7 @@ export default function AgentChat( {
 						heading={ getEmptyViewHeading() }
 						help={ emptyViewSuggestions.length > 0 ? getEmptyViewHelp() : undefined }
 						suggestions={ emptyViewSuggestions }
-						onSuggestionClick={ isShopperHost() ? undefined : onSuggestionClick }
+						onSuggestionClick={ onSuggestionClick }
 						icon={ <AI size={ 32 } /> }
 					/>
 				)
