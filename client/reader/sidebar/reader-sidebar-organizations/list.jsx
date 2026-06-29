@@ -17,6 +17,7 @@ export class ReaderSidebarOrganizationsList extends Component {
 		organization: PropTypes.object,
 		sites: PropTypes.array,
 		teams: PropTypes.array,
+		hasLoadedAllPages: PropTypes.bool,
 	};
 
 	toggleMenu = () => {
@@ -60,7 +61,7 @@ export class ReaderSidebarOrganizationsList extends Component {
 			<ExpandableSidebarMenu
 				expanded={ this.props.isOrganizationOpen }
 				title={ organization.title }
-				count={ unseenCount > 0 ? unseenCount : undefined }
+				count={ this.props.hasLoadedAllPages && unseenCount > 0 ? unseenCount : undefined }
 				onClick={ this.selectMenu }
 				expandableIconClick={ this.toggleMenu }
 				customIcon={ this.renderIcon() }
@@ -78,8 +79,15 @@ export class ReaderSidebarOrganizationsList extends Component {
 }
 
 function OrganizationsListWithFollows( props ) {
-	const sites = useOrganizationSiteSubscriptions( props.organization.id );
-	return <ReaderSidebarOrganizationsList { ...props } sites={ sites } />;
+	const { sites, hasLoadedAllPages } = useOrganizationSiteSubscriptions( props.organization.id );
+
+	return (
+		<ReaderSidebarOrganizationsList
+			{ ...props }
+			sites={ sites }
+			hasLoadedAllPages={ hasLoadedAllPages }
+		/>
+	);
 }
 
 export default connect(

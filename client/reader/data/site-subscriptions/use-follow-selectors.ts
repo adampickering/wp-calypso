@@ -39,19 +39,25 @@ export const useAliasedSiteSubscriptionFeedUrl = ( feedUrl: string ) => {
 };
 
 export const useSubscribedSites = () => {
-	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
+	const { data, hasLoadedAllPages } = useSiteSubscriptions( { fetchAllPages: true } );
 
-	return getSubscribedSitesFromData( data, NO_ORG_ID );
+	return {
+		sites: getSubscribedSitesFromData( data, NO_ORG_ID ),
+		hasLoadedAllPages,
+	};
 };
 
 export const useOrganizationSiteSubscriptions = ( organizationId: number ) => {
-	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
+	const { data, hasLoadedAllPages } = useSiteSubscriptions( { fetchAllPages: true } );
 
-	return getOrganizationSiteSubscriptionsFromData( data, organizationId );
+	return {
+		sites: getOrganizationSiteSubscriptionsFromData( data, organizationId ),
+		hasLoadedAllPages,
+	};
 };
 
 export const useOrganizationFeedsInfo = ( organizationId: number ) => {
-	const sites = useOrganizationSiteSubscriptions( organizationId );
+	const { sites } = useOrganizationSiteSubscriptions( organizationId );
 
 	return {
 		unseenCount: sites.reduce( ( sum, item ) => sum + ( item.unseen_count ?? 0 ), 0 ),

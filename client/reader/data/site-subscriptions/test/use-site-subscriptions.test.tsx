@@ -12,7 +12,11 @@ import nock from 'nock';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import * as selectors from '../use-follow-selectors';
-import { useSiteSubscriptionForFeed, useIsSubscribed } from '../use-follow-selectors';
+import {
+	useSiteSubscriptionForFeed,
+	useIsSubscribed,
+	useSubscribedSites,
+} from '../use-follow-selectors';
 import { useSiteSubscriptions } from '../use-site-subscriptions';
 import type { SiteSubscriptionItem } from '@automattic/api-core';
 import type { ReactNode } from 'react';
@@ -79,6 +83,33 @@ describe( 'subscriptions hooks', () => {
 
 		expect( result.current.subscriptions ).toEqual( [ follow ] );
 		expect( result.current.count ).toBe( 7 );
+	} );
+
+	it( 'returns hasLoadedAllPages as false while more subscription pages remain', async () => {
+		const queryClient = makeQueryClient();
+		// One row covered (100 requested) against a total of 500 — a page remains.
+		queryClient.setQueryData( getSiteSubscriptionsQueryKey(), makeData( [ makeFollow() ], 500 ) );
+
+		const { result } = renderHook( () => useSiteSubscriptions(), {
+			wrapper: makeWrapper( queryClient ),
+		} );
+		await waitFor( () => expect( result.current.isSuccess ).toBe( true ) );
+
+		expect( result.current.hasNextPage ).toBe( true );
+		expect( result.current.hasLoadedAllPages ).toBe( false );
+	} );
+
+	it( 'returns hasLoadedAllPages as true when all subscription pages are loaded', async () => {
+		const queryClient = makeQueryClient();
+		const follow = makeFollow();
+		queryClient.setQueryData( getSiteSubscriptionsQueryKey(), makeData( [ follow ], 1 ) );
+
+		const { result } = renderHook( () => useSubscribedSites(), {
+			wrapper: makeWrapper( queryClient ),
+		} );
+		await waitFor( () => expect( result.current.hasLoadedAllPages ).toBe( true ) );
+
+		expect( result.current.sites ).toEqual( [ follow ] );
 	} );
 
 	it( 'does not fetch subscriptions while the current user is logged out', async () => {

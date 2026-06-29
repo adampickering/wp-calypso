@@ -30,7 +30,10 @@ type Props = {
 const SITE_DISPLAY_CUTOFF = 5;
 const RECENT_PATH_REGEX = /^\/reader(?:\/recent\/\d+)?\/?(?:\?|$)/;
 
-type ReaderSidebarSite = Pick< ReturnType< typeof useSubscribedSites >[ number ], 'name' | 'URL' >;
+type ReaderSidebarSite = Pick<
+	ReturnType< typeof useSubscribedSites >[ 'sites' ][ number ],
+	'name' | 'URL'
+>;
 
 const isFreeWpcomSubdomain = ( host = '' ): boolean => /\.wordpress\.com$/i.test( host );
 
@@ -60,7 +63,7 @@ const ReaderSidebarRecent = ( {
 	className,
 }: Props ): React.JSX.Element => {
 	const [ showAllSites, setShowAllSites ] = useState( false );
-	const sites = useSubscribedSites();
+	const { sites, hasLoadedAllPages } = useSubscribedSites();
 	const totalUnseenCount = sites.reduce( ( sum, site ) => sum + ( site.unseen_count ?? 0 ), 0 );
 	const selectedSiteFeedId = useSelector< AppState, number | null >( getSelectedRecentFeedId );
 	const moment = useLocalizedMoment();
@@ -112,7 +115,7 @@ const ReaderSidebarRecent = ( {
 			className={ clsx( 'reader-sidebar-recent', 'has-counts', className, {
 				'sidebar__menu--selected': isRecentStream && ( ! isOpen || selectedSiteFeedId === null ),
 			} ) }
-			count={ totalUnseenCount > 0 ? totalUnseenCount : undefined }
+			count={ hasLoadedAllPages && totalUnseenCount > 0 ? totalUnseenCount : undefined }
 			icon={ null }
 			materialIcon={ null }
 			materialIconStyle={ null }

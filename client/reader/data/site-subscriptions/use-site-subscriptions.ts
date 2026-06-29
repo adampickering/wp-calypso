@@ -34,5 +34,6 @@ export const useSiteSubscriptions = ( {
 	return Object.assign( {}, query, {
 		subscriptions: getSiteSubscriptionsFromData( data ),
 		count: getSiteSubscriptionsCountFromData( data ),
+		hasLoadedAllPages: query.isSuccess && ! hasNextPage && ! isFetchingNextPage,
 	} );
 };
