@@ -23,7 +23,7 @@ export default function Notifications( { user, className }: { user: User; classN
 		if ( isOpen ) {
 			return;
 		}
-		return subscribeUnseenNotifications( wpcom, setHasUnseenNotifications );
+		return subscribeUnseenNotifications( setHasUnseenNotifications );
 	}, [ isOpen ] );
 
 	const handleToggle = ( willOpen: boolean ) => {
