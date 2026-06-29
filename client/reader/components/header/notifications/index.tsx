@@ -1,4 +1,4 @@
-import { subscribeUnseenNotifications } from '@automattic/notifications/src/app/unseen-notifications';
+import { subscribeUnseenCount } from '@automattic/notifications/src/app/unseen-notifications';
 import { Button, Dropdown } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
@@ -22,7 +22,7 @@ export default function Notifications( { user, className }: { user: User; classN
 		if ( isOpen ) {
 			return;
 		}
-		return subscribeUnseenNotifications( setHasUnseenNotifications );
+		return subscribeUnseenCount( wpcom, ( count ) => setHasUnseenNotifications( count > 0 ) );
 	}, [ isOpen ] );
 
 	const handleToggle = ( willOpen: boolean ) => {
