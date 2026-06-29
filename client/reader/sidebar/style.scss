@@ -138,14 +138,6 @@ body.is-section-reader {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-left: 32px;
-		}
-
-		.sidebar__expandable-arrow {
-			background: none;
-			fill: var( --studio-gray-20 );
-			transition: transform 0.15s ease;
-			transform: rotate( -90deg );
 		}
 
 		.sidebar__expandable-content {
@@ -204,7 +196,7 @@ body.is-section-reader {
 	.sidebar__menu .a8c-count {
 		position: relative;
 		flex-shrink: 0;
-		top: 0;
+		top: 1px;
 		font-size: 0.67rem; /* stylelint-disable-line scales/font-sizes */
 		font-weight: normal;
 		box-sizing: border-box;
@@ -218,6 +210,7 @@ body.is-section-reader {
 		color: currentColor;
 		justify-self: end;
 		align-self: self-start;
+		width: fit-content;
 	}
 
 	.sidebar__menu-link {

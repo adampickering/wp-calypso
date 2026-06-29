@@ -36,13 +36,8 @@ export class ReaderSidebarOrganizationsList extends Component {
 		}
 	};
 
-	renderAll() {
-		const { translate, organization, path, sites } = this.props;
-		// have a selector
-		const sum = sites.reduce( ( acc, item ) => {
-			acc = acc + item.unseen_count;
-			return acc;
-		}, 0 );
+	renderAll( unseenCount ) {
+		const { translate, organization, path } = this.props;
 		return (
 			<>
 				<SidebarItem
@@ -54,7 +49,7 @@ export class ReaderSidebarOrganizationsList extends Component {
 					} ) }
 					icon={ <AllIcon /> }
 				>
-					{ sum > 0 && <Count count={ sum } compact /> }
+					{ unseenCount > 0 && <Count count={ unseenCount } compact /> }
 				</SidebarItem>
 			</>
 		);
@@ -75,10 +70,13 @@ export class ReaderSidebarOrganizationsList extends Component {
 			return null;
 		}
 
+		const unseenCount = sites.reduce( ( acc, item ) => acc + ( item.unseen_count ?? 0 ), 0 );
+
 		return (
 			<ExpandableSidebarMenu
 				expanded={ this.props.isOrganizationOpen }
 				title={ organization.title }
+				count={ unseenCount > 0 ? unseenCount : undefined }
 				onClick={ this.selectMenu }
 				expandableIconClick={ this.toggleMenu }
 				disableFlyout
@@ -87,7 +85,7 @@ export class ReaderSidebarOrganizationsList extends Component {
 						! this.props.isOrganizationOpen && '/reader/' + organization.slug === path,
 				} ) }
 			>
-				{ this.renderAll() }
+				{ this.renderAll( unseenCount ) }
 				{ this.renderSites() }
 			</ExpandableSidebarMenu>
 		);
