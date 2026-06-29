@@ -17,8 +17,7 @@ export default function Notifications( { user, className }: { user: User; classN
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ hasUnseenNotifications, setHasUnseenNotifications ] = useState( user.has_unseen_notes );
 
-	// Keep the bell live while the panel is closed; the open panel drives the
-	// value via APP_RENDER_NOTES below.
+	// Keep the bell live while the panel is closed.
 	useEffect( () => {
 		if ( isOpen ) {
 			return;
