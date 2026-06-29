@@ -1,3 +1,4 @@
+import { subscribeUnseenNotifications } from '@automattic/notifications/src/app/unseen-notifications';
 import { Button, Dropdown } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
@@ -15,6 +16,15 @@ export default function Notifications( { user, className }: { user: User; classN
 	const isMobileViewport = useViewportMatch( 'small', '<' );
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ hasUnseenNotifications, setHasUnseenNotifications ] = useState( user.has_unseen_notes );
+
+	// Keep the bell live while the panel is closed; the open panel drives the
+	// value via APP_RENDER_NOTES below.
+	useEffect( () => {
+		if ( isOpen ) {
+			return;
+		}
+		return subscribeUnseenNotifications( wpcom, setHasUnseenNotifications );
+	}, [ isOpen ] );
 
 	const handleToggle = ( willOpen: boolean ) => {
 		setIsOpen( willOpen );
