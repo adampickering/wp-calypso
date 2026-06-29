@@ -21,31 +21,31 @@ const hasId = ( id: FollowId | null | undefined ): id is FollowId =>
 	typeof id !== 'undefined' && id !== null;
 
 export const useSiteSubscriptionForFeed = ( feedId?: FollowId ) => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 
 	return hasId( feedId ) ? getSiteSubscriptionByFeedIdFromData( data, feedId ) : undefined;
 };
 
 export const useIsSubscribed = ( args: IsFollowingArgs ) => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 
 	return getIsSubscribedFromData( data, args );
 };
 
 export const useAliasedSiteSubscriptionFeedUrl = ( feedUrl: string ) => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 
 	return getAliasedSiteSubscriptionFeedUrl( data, feedUrl ) ?? feedUrl;
 };
 
 export const useSubscribedSites = () => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 
 	return getSubscribedSitesFromData( data, NO_ORG_ID );
 };
 
 export const useOrganizationSiteSubscriptions = ( organizationId: number ) => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 
 	return getOrganizationSiteSubscriptionsFromData( data, organizationId );
 };
@@ -61,7 +61,7 @@ export const useOrganizationFeedsInfo = ( organizationId: number ) => {
 };
 
 export const useHasSiteSubscriptionOrganization = ( feedId?: FollowId, blogId?: FollowId ) => {
-	const { data } = useSiteSubscriptions();
+	const { data } = useSiteSubscriptions( { fetchAllPages: true } );
 	const feedFollow = hasId( feedId )
 		? getSiteSubscriptionByFeedIdFromData( data, feedId )
 		: undefined;
