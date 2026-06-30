@@ -16,7 +16,7 @@ const settings = {
 	// window (NOTES_PER_PAGE); the list fetches as many pages as needed to fill
 	// the window, so the window never outruns the loaded notes.
 	increment_limit: 10,
-	max_limit: 100,
+	max_limit: 200,
 };
 
 export function Client() {
@@ -195,10 +195,12 @@ function getNotes( before ) {
 
 	const parameters = {
 		fields: 'id,type,unread,body,subject,timestamp,meta,note_hash,variant',
-		// Older pages request what's left under the cap; the no-`before` refresh
+		// Older pages request what's left under the cap, plus one for the anchor an
+		// inclusive `before` echoes back (it dedupes away below) so the page still
+		// nets up to the cap instead of stalling one short; the no-`before` refresh
 		// requests a small fixed head window.
 		number: before
-			? Math.min( settings.increment_limit, settings.max_limit - loaded )
+			? Math.min( settings.increment_limit, settings.max_limit - loaded + 1 )
 			: settings.initial_limit,
 		locale: this.locale,
 	};
@@ -278,8 +280,11 @@ function getNotes( before ) {
 		// The lightweight id/hash list the polling diff compares against.
 		const pageList = data.notes.map( ( { id, note_hash } ) => ( { id, note_hash } ) );
 		if ( before ) {
-			// An older page appends to the window.
-			this.noteList = this.noteList.concat( pageList );
+			// An older page appends to the window, de-duped so the anchor an inclusive
+			// `before` echoes back doesn't inflate the window count (which gates
+			// load-more and the per-page cap) and stall short of max_limit.
+			const known = new Set( this.noteList.map( ( n ) => n.id ) );
+			this.noteList = this.noteList.concat( pageList.filter( ( n ) => ! known.has( n.id ) ) );
 		} else {
 			// Merge the head over the window, keeping the older paged-in tail.
 			const headIds = new Set( pageList.map( ( n ) => n.id ) );
@@ -441,9 +446,11 @@ function getFilteredNotes( before ) {
 	const parameters = {
 		fields: 'id,type,unread,body,subject,timestamp,meta,note_hash,variant',
 		// No `before`: re-request a small fixed head window. With it: page an older
-		// slice, capped to what's left under max_limit.
+		// slice, capped to what's left under max_limit plus one for the anchor an
+		// inclusive `before` echoes back (de-duped below), so the view fills to the
+		// cap instead of stalling one note short.
 		number: before
-			? Math.min( settings.increment_limit, settings.max_limit - unreadIds.length )
+			? Math.min( settings.increment_limit, settings.max_limit - unreadIds.length + 1 )
 			: settings.initial_limit,
 		locale: this.locale,
 		...filter,
