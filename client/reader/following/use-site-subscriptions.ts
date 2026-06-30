@@ -1,5 +1,5 @@
 import { SubscriptionManager } from '@automattic/data-stores';
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 
 /**
  * Custom hook to manage site subscriptions data.
@@ -14,11 +14,8 @@ import { useMemo, useEffect } from 'react';
 export function useSiteSubscriptions() {
 	const { data: subscriptionsCount, isLoading: isLoadingCount } =
 		SubscriptionManager.useSubscriptionsCountQuery();
-	const {
-		data: siteSubscriptions,
-		isLoading: isLoadingSiteSubscriptions,
-		refetch: refetchSiteSubscriptions,
-	} = SubscriptionManager.useSiteSubscriptionsQuery();
+	const { data: siteSubscriptions, isLoading: isLoadingSiteSubscriptions } =
+		SubscriptionManager.useSiteSubscriptionsQuery();
 
 	const isLoadingDependencies = subscriptionsCount === undefined || siteSubscriptions === undefined;
 	const isLoading = isLoadingCount || isLoadingSiteSubscriptions || isLoadingDependencies;
@@ -44,12 +41,6 @@ export function useSiteSubscriptions() {
 
 		return true;
 	}, [ blogCount, siteSubscriptions, nonSelfSubscriptionsCount ] );
-
-	useEffect( () => {
-		if ( blogCount > 0 ) {
-			refetchSiteSubscriptions();
-		}
-	}, [ refetchSiteSubscriptions, blogCount ] );
 
 	return {
 		isLoading,
