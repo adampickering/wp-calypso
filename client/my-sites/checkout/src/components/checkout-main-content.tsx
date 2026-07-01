@@ -1025,7 +1025,7 @@ export default function CheckoutMainContent( {
 						validatingButtonText={ validatingButtonText }
 						validatingButtonAriaLabel={ validatingButtonText }
 						onPageLoadError={ onPageLoadError }
-						waitForPaymentMethodIds={ [ 'apple-pay', 'google-pay' ] }
+						waitForPaymentMethodIds={ [ 'apple-pay', 'google-pay', 'stripe-wallet' ] }
 						isCompleteCallback={ () => {
 							// We want to consider this step complete only if there is a
 							// payment method selected and it does not have required fields.
