@@ -1,14 +1,15 @@
-import { HostingFeatures, LogType, type Site, type SiteSettings } from '@automattic/api-core';
-import { siteBySlugQuery, siteSettingsQuery } from '@automattic/api-queries';
+import { HostingFeatures, LogType, type Site } from '@automattic/api-core';
+import { siteBySlugQuery } from '@automattic/api-queries';
 import { isEnabled } from '@automattic/calypso-config';
 import { DateRangePicker, isLast7Days } from '@automattic/date-range-picker';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useRouter } from '@tanstack/react-router';
+import { useRouter, useSearch } from '@tanstack/react-router';
 import { TabPanel } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { useDateRange } from '../../app/hooks/use-date-range';
+import { useSiteTimezoneWithJetpackFallback } from '../../app/hooks/use-site-timezone';
 import { useLocale } from '../../app/locale';
 import { Card, CardBody, CardHeader } from '../../components/card';
 import InlineSupportLink from '../../components/inline-support-link';
@@ -27,42 +28,16 @@ import { getLogsCalloutProps } from './logs-callout';
 import { LOG_TABS } from './utils';
 import './style.scss';
 
-const selectTimeZone = ( s: SiteSettings | undefined ) => ( {
-	gmtOffset: Number( s?.gmt_offset ) || 0,
-	timezoneString: s?.timezone_string || undefined,
-} );
-
 function SiteLogs( { logType, siteSlug }: { logType: LogType; siteSlug: string } ) {
 	const { data: site } = useSuspenseQuery( siteBySlugQuery( siteSlug ) );
-
-	// Sites with a Jetpack connection error can't reach the settings endpoint;
-	// fall back to UTC defaults so the Logs page remains accessible.
-	if ( site.__inaccessible_jetpack_error ) {
-		return (
-			<SiteLogsContent
-				site={ site }
-				logType={ logType }
-				gmtOffset={ 0 }
-				timezoneString={ undefined }
-			/>
-		);
-	}
-
-	return <SiteLogsForReachableSite site={ site } logType={ logType } />;
-}
-
-function SiteLogsForReachableSite( { site, logType }: { site: Site; logType: LogType } ) {
-	const { data } = useSuspenseQuery( {
-		...siteSettingsQuery( site.ID ),
-		select: selectTimeZone,
-	} );
+	const { gmtOffset, timezoneString } = useSiteTimezoneWithJetpackFallback( site );
 
 	return (
 		<SiteLogsContent
 			site={ site }
 			logType={ logType }
-			gmtOffset={ data.gmtOffset }
-			timezoneString={ data.timezoneString }
+			gmtOffset={ gmtOffset }
+			timezoneString={ timezoneString }
 		/>
 	);
 }
@@ -91,6 +66,7 @@ function SiteLogsContent( {
 	);
 
 	const siteId = site.ID;
+	const activitySearchParams = useSearch( { strict: false } );
 	const showTimeMismatchNotice = useShouldShowTimeMismatchNotice( {
 		siteTime: gmtOffset,
 		siteId,
@@ -279,6 +255,7 @@ function SiteLogsContent( {
 								timezoneString={ timezoneString }
 								site={ site }
 								hasActivityLogsAccess={ hasActivityLogAccess }
+								searchParams={ activitySearchParams }
 							/>
 						</>
 					) }
