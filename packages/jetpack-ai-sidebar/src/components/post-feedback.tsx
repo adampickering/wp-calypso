@@ -95,7 +95,7 @@ function normaliseSections( items?: PostFeedbackItem[], sections?: PostFeedbackS
 	if ( Array.isArray( items ) && items.length > 0 ) {
 		return [
 			{
-				title: __( 'Feedback', 'jetpack' ),
+				title: __( 'Feedback', __i18n_text_domain__ ),
 				items,
 			},
 		];
@@ -108,22 +108,24 @@ function getApplyUnavailableReason(
 	block: BlockSnapshot | null
 ): string | undefined {
 	if ( item.requires_manual ) {
-		return item.manual_reason || __( 'This item cannot be applied automatically.', 'jetpack' );
+		return (
+			item.manual_reason || __( 'This item cannot be applied automatically.', __i18n_text_domain__ )
+		);
 	}
 	if ( ! item.suggested_text ) {
-		return __( 'Needs manual edit - no rewrite was generated.', 'jetpack' );
+		return __( 'Needs manual edit - no rewrite was generated.', __i18n_text_domain__ );
 	}
 	if ( item.block_index === null || item.block_index === undefined ) {
-		return __( 'Needs manual edit - no exact block target.', 'jetpack' );
+		return __( 'Needs manual edit - no exact block target.', __i18n_text_domain__ );
 	}
 	if ( ! block ) {
-		return __( 'Needs manual edit - source block changed.', 'jetpack' );
+		return __( 'Needs manual edit - source block changed.', __i18n_text_domain__ );
 	}
 	if ( ! item.current_text ) {
-		return __( 'Needs manual edit - no exact source text.', 'jetpack' );
+		return __( 'Needs manual edit - no exact source text.', __i18n_text_domain__ );
 	}
 	if ( ! hasEditableBlockTarget( block, item.editable_attribute, item.current_text ) ) {
-		return __( 'Needs manual edit - unsupported edit target.', 'jetpack' );
+		return __( 'Needs manual edit - unsupported edit target.', __i18n_text_domain__ );
 	}
 
 	const occurrences = countOccurrences(
@@ -131,10 +133,10 @@ function getApplyUnavailableReason(
 		item.current_text
 	);
 	if ( occurrences === 0 ) {
-		return __( 'Needs manual edit - source text changed.', 'jetpack' );
+		return __( 'Needs manual edit - source text changed.', __i18n_text_domain__ );
 	}
 	if ( occurrences > 1 ) {
-		return __( 'Needs manual edit - source text appears more than once.', 'jetpack' );
+		return __( 'Needs manual edit - source text appears more than once.', __i18n_text_domain__ );
 	}
 	return undefined;
 }
@@ -142,19 +144,19 @@ function getApplyUnavailableReason(
 function getApplyLabel( status: ItemStatus ): string {
 	switch ( status ) {
 		case 'applying':
-			return __( 'Accepting…', 'jetpack' );
+			return __( 'Accepting…', __i18n_text_domain__ );
 		case 'accepted':
-			return __( 'Accepted', 'jetpack' );
+			return __( 'Accepted', __i18n_text_domain__ );
 		case 'failed':
-			return __( 'Retry', 'jetpack' );
+			return __( 'Retry', __i18n_text_domain__ );
 		default:
-			return __( 'Accept', 'jetpack' );
+			return __( 'Accept', __i18n_text_domain__ );
 	}
 }
 
 function getUnavailableMessage( item: PostFeedbackItem, reason: string ): string {
 	if ( item.requires_manual ) {
-		return `${ __( 'Needs manual edit:', 'jetpack' ) } ${ reason }`;
+		return `${ __( 'Needs manual edit:', __i18n_text_domain__ ) } ${ reason }`;
 	}
 	return reason;
 }
@@ -307,12 +309,15 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 		>
 			{ isPostStale && (
 				<p className="jetpack-ai-post-feedback__stale-warning" role="note">
-					{ __( 'Feedback context changed. Generate feedback again for this post.', 'jetpack' ) }
+					{ __(
+						'Feedback context changed. Generate feedback again for this post.',
+						__i18n_text_domain__
+					) }
 				</p>
 			) }
 			<Panel className="jetpack-ai-post-feedback__panel">
 				<PanelBody
-					title={ __( 'Summary', 'jetpack' ) }
+					title={ __( 'Summary', __i18n_text_domain__ ) }
 					className="jetpack-ai-post-feedback__summary"
 					initialOpen
 				>
@@ -331,7 +336,7 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 								const isCollapsed = status === 'accepted' || status === 'dismissed';
 								const block = item.block_index === null ? null : flatBlocks[ item.block_index ];
 								const applyUnavailableReason = isPostStale
-									? __( 'Generate feedback again for this post.', 'jetpack' )
+									? __( 'Generate feedback again for this post.', __i18n_text_domain__ )
 									: getApplyUnavailableReason( item, block );
 								const isApplyUnavailable = !! applyUnavailableReason;
 								const applyUnavailableReasonId = getItemReasonId( sectionIndex, itemIndex );
@@ -344,8 +349,8 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 										>
 											<span className="jetpack-ai-post-feedback__collapsed-status">
 												{ status === 'accepted'
-													? __( 'Applied', 'jetpack' )
-													: __( 'Dismissed', 'jetpack' ) }
+													? __( 'Applied', __i18n_text_domain__ )
+													: __( 'Dismissed', __i18n_text_domain__ ) }
 											</span>
 											<span className="jetpack-ai-post-feedback__collapsed-title">
 												{ item.title }
@@ -356,7 +361,7 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 												onClick={ () => undoItem( key ) }
 												disabled={ isPostStale }
 											>
-												{ __( 'Undo', 'jetpack' ) }
+												{ __( 'Undo', __i18n_text_domain__ ) }
 											</button>
 										</div>
 									);
@@ -378,7 +383,7 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 										{ item.current_text && item.suggested_text && (
 											<div className="jetpack-ai-post-feedback__rewrite">
 												<p className="jetpack-ai-post-feedback__rewrite-label">
-													{ __( 'Suggested rewrite', 'jetpack' ) }
+													{ __( 'Suggested rewrite', __i18n_text_domain__ ) }
 												</p>
 												<del>{ item.current_text }</del>
 												<ins>{ item.suggested_text }</ins>
@@ -412,14 +417,14 @@ export default function PostFeedback( { summary, items, sections, postId }: Post
 												onClick={ () => dismissItem( key ) }
 												disabled={ isPostStale || status === 'applying' }
 											>
-												{ __( 'Dismiss', 'jetpack' ) }
+												{ __( 'Dismiss', __i18n_text_domain__ ) }
 											</button>
 										</div>
 										{ status === 'failed' && (
 											<p className="jetpack-ai-post-feedback__status is-failed">
 												{ __(
 													'Could not apply this rewrite. Check the text and try again.',
-													'jetpack'
+													__i18n_text_domain__
 												) }
 											</p>
 										) }

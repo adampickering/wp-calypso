@@ -89,8 +89,8 @@ let lastBlockTransformationSuggestionContext: {
 /** Default suggestion shown when no block is selected. */
 const OPTIMIZE_TITLE_SUGGESTION = {
 	id: 'optimize-title',
-	label: __( 'Optimize Title', 'jetpack' ),
-	prompt: __( 'Optimize the title of this post', 'jetpack' ),
+	label: __( 'Optimize Title', __i18n_text_domain__ ),
+	prompt: __( 'Optimize the title of this post', __i18n_text_domain__ ),
 };
 
 /**
@@ -140,19 +140,19 @@ const SEO_ENHANCER_SUGGESTION = {
  */
 const AI_EDITORIAL_REVIEW_SUGGESTION = {
 	id: 'mediate-review-notes',
-	label: __( 'AI Editorial Review', 'jetpack' ),
+	label: __( 'AI Editorial Review', __i18n_text_domain__ ),
 	prompt: __(
 		'Run an AI Editorial Review for this post. Check the content, reviewer notes, and site guidelines, then surface conflicts, implications, guideline issues, and suggested edits.',
-		'jetpack'
+		__i18n_text_domain__
 	),
 };
 
 const POST_FEEDBACK_SUGGESTION = {
 	id: 'generate-feedback',
-	label: __( 'Generate Feedback', 'jetpack' ),
+	label: __( 'Generate Feedback', __i18n_text_domain__ ),
 	prompt: __(
 		'Generate feedback for this saved post. Review the saved title and saved block content for content structure, reader clarity, completeness, media/caption/link issues, and obvious publishability concerns. Return practical feedback with one-click suggestions when safe.',
-		'jetpack'
+		__i18n_text_domain__
 	),
 };
 
@@ -769,36 +769,36 @@ type BlockSuggestion = {
 const BLOCK_SUGGESTIONS: BlockSuggestion[] = [
 	{
 		id: 'translate',
-		label: __( 'Translate content', 'jetpack' ),
-		prompt: __( 'Translate this block content to:', 'jetpack' ),
+		label: __( 'Translate content', __i18n_text_domain__ ),
+		prompt: __( 'Translate this block content to:', __i18n_text_domain__ ),
 		type: 'text',
 		condition: ( block: any ) => TEXT_BLOCK_TYPES.includes( block?.name ),
 	},
 	{
 		id: 'change-tone',
-		label: __( 'Change tone', 'jetpack' ),
-		prompt: __( 'Change the tone of this text to be more:', 'jetpack' ),
+		label: __( 'Change tone', __i18n_text_domain__ ),
+		prompt: __( 'Change the tone of this text to be more:', __i18n_text_domain__ ),
 		type: 'text',
 		condition: ( block: any ) => TEXT_BLOCK_TYPES.includes( block?.name ),
 	},
 	{
 		id: 'check-grammar',
-		label: __( 'Check grammar', 'jetpack' ),
-		prompt: __( 'Check the grammar and spelling of this text', 'jetpack' ),
+		label: __( 'Check grammar', __i18n_text_domain__ ),
+		prompt: __( 'Check the grammar and spelling of this text', __i18n_text_domain__ ),
 		type: 'text',
 		condition: ( block: any ) => TEXT_BLOCK_TYPES.includes( block?.name ),
 	},
 	{
 		id: 'simplify-text',
-		label: __( 'Simplify text', 'jetpack' ),
-		prompt: __( 'Simplify this text to make it easier to read', 'jetpack' ),
+		label: __( 'Simplify text', __i18n_text_domain__ ),
+		prompt: __( 'Simplify this text to make it easier to read', __i18n_text_domain__ ),
 		type: 'text',
 		condition: ( block: any ) => TEXT_BLOCK_TYPES.includes( block?.name ),
 	},
 	{
 		id: 'generate-alt-text',
-		label: __( 'Generate alt text', 'jetpack' ),
-		prompt: __( 'Generate descriptive alt text for this image', 'jetpack' ),
+		label: __( 'Generate alt text', __i18n_text_domain__ ),
+		prompt: __( 'Generate descriptive alt text for this image', __i18n_text_domain__ ),
 		type: 'image',
 		condition: ( block: any ) => IMAGE_BLOCK_TYPES.includes( block?.name ),
 	},
