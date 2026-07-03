@@ -70,16 +70,23 @@ export class LoginPage {
 		const startedAtMs = Date.now();
 		try {
 			await locator.fill( value );
-		} catch ( error ) {
-			flakeProbe( 'login.fillUsernameTimeout', {
-				elapsedMs: Date.now() - startedAtMs,
-				visible: await locator.isVisible().catch( () => null ),
-				enabled: await locator.isEnabled().catch( () => null ),
-				count: await locator.count().catch( () => null ),
-				...( await capturePageState( this.page ) ),
-				error: ( error as Error ).message,
-			} );
-			throw error;
+		} catch {
+			// The login input can stay disabled if the page fails to hydrate; a
+			// reload recovers it. Retry once before failing.
+			await this.page.reload();
+			try {
+				await locator.fill( value );
+			} catch ( error ) {
+				flakeProbe( 'login.fillUsernameTimeout', {
+					elapsedMs: Date.now() - startedAtMs,
+					visible: await locator.isVisible().catch( () => null ),
+					enabled: await locator.isEnabled().catch( () => null ),
+					count: await locator.count().catch( () => null ),
+					...( await capturePageState( this.page ) ),
+					error: ( error as Error ).message,
+				} );
+				throw error;
+			}
 		}
 		flakeProbe( 'login.fillUsername', { elapsedMs: Date.now() - startedAtMs } );
 
