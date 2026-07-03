@@ -107,9 +107,20 @@ const PostCheckoutOnboarding: StepType< {
 
 	const { setIntentOnSite, setGoalsOnSite } = useDispatch( SITE_STORE );
 
+	// Prefer the cart item (what the user just bought — freshest signal during
+	// post-checkout) over site.plan (which can be stale before the site's plan
+	// assignment syncs).
+	const effectivePlan = planCartItem ?? site?.plan;
+	const isCommercePlan = !! effectivePlan && isEcommerce( effectivePlan );
+
+	// The onboarding flow has no goals/intent step, so the Onboard store intent is
+	// empty here. Derive it from the purchased plan so commerce buyers get the
+	// selling launchpad instead of the default blogging one.
+	const effectiveIntent = isCommercePlan ? SiteIntent.Sell : intent;
+
 	const waitForAtomic = async () => {
 		await waitForTransfer();
-		await setIntentOnSite( siteSlug, intent );
+		await setIntentOnSite( siteSlug, effectiveIntent );
 		await setGoalsOnSite( siteSlug, goals );
 		await waitForFeature();
 		await waitForLatestSiteData();
@@ -120,12 +131,6 @@ const PostCheckoutOnboarding: StepType< {
 
 	const refParameter = useUrlParams().get( 'ref' );
 	const isWooHostingSolutions = refParameter === WOO_HOSTING_SOLUTIONS_REF;
-
-	// Prefer the cart item (what the user just bought — freshest signal during
-	// post-checkout) over site.plan (which can be stale before the site's plan
-	// assignment syncs).
-	const effectivePlan = planCartItem ?? site?.plan;
-	const isCommercePlan = !! effectivePlan && isEcommerce( effectivePlan );
 
 	// Woo-hosting-solutions ref:
 	// - Commerce plans: the backend auto-provisions the Atomic transfer and
