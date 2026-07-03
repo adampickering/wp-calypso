@@ -193,13 +193,24 @@ const PostCheckoutOnboarding: StepType< {
 				...( showBigSkyChoice ? { postCheckoutBigSky: true } : {} ),
 			};
 
+			let intentWritten = false;
 			if ( ! isJetpackOrAtomic ) {
 				if ( siteTransferStatusData?.isTransferring ) {
 					await waitForAtomic();
+					intentWritten = true;
 				} else if ( hasExternalTheme || shouldInstallPlugin ) {
 					await waitForInitiateTransfer( pluginToInstall );
 					await waitForAtomic();
+					intentWritten = true;
 				}
+			}
+
+			// waitForAtomic() persists the intent, but it only runs on the Atomic
+			// transfer path. Commerce sites may already be Atomic by the time this
+			// runs, so ensure the selling intent is written regardless — otherwise
+			// My Home falls back to the default (build) launchpad.
+			if ( isCommercePlan && ! intentWritten ) {
+				await setIntentOnSite( siteSlug, SiteIntent.Sell );
 			}
 
 			// Poll for the Woo ref regardless of the atomic path above — the
