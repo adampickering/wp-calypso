@@ -120,8 +120,6 @@ const PostCheckoutOnboarding: StepType< {
 
 	const waitForAtomic = async () => {
 		await waitForTransfer();
-		await setIntentOnSite( siteSlug, effectiveIntent );
-		await setGoalsOnSite( siteSlug, goals );
 		await waitForFeature();
 		await waitForLatestSiteData();
 	};
@@ -193,24 +191,23 @@ const PostCheckoutOnboarding: StepType< {
 				...( showBigSkyChoice ? { postCheckoutBigSky: true } : {} ),
 			};
 
-			let intentWritten = false;
 			if ( ! isJetpackOrAtomic ) {
 				if ( siteTransferStatusData?.isTransferring ) {
 					await waitForAtomic();
-					intentWritten = true;
 				} else if ( hasExternalTheme || shouldInstallPlugin ) {
 					await waitForInitiateTransfer( pluginToInstall );
 					await waitForAtomic();
-					intentWritten = true;
 				}
 			}
 
-			// waitForAtomic() persists the intent, but it only runs on the Atomic
-			// transfer path. Commerce sites may already be Atomic by the time this
-			// runs, so ensure the selling intent is written regardless — otherwise
-			// My Home falls back to the default (build) launchpad.
-			if ( isCommercePlan && ! intentWritten ) {
-				await setIntentOnSite( siteSlug, SiteIntent.Sell );
+			// Persist the intent (and goals) once, regardless of the Atomic path
+			// taken above — commerce sites may already be Atomic here. effectiveIntent
+			// is the purchased plan's intent (Sell for commerce). It is empty for
+			// plans with no intent in this flow, in which case we leave the site's
+			// creation-time intent untouched rather than clobbering it.
+			if ( effectiveIntent ) {
+				await setIntentOnSite( siteSlug, effectiveIntent );
+				await setGoalsOnSite( siteSlug, goals );
 			}
 
 			// Poll for the Woo ref regardless of the atomic path above — the
@@ -242,6 +239,8 @@ const PostCheckoutOnboarding: StepType< {
 		isMarketplaceThemeSubscribed,
 		isExternallyManagedThemeAvailable,
 		shouldInstallPlugin,
+		effectiveIntent,
+		goals,
 	] );
 
 	if ( hasError ) {
