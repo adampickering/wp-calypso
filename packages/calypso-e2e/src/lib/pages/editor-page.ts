@@ -27,6 +27,7 @@ import {
 	CookieBannerComponent,
 	EditorToolbarSettingsButton,
 } from '../components';
+import { flakeProbe } from '../flake-probe';
 import { BlockInserter, OpenInlineInserter } from './shared-types';
 import type {
 	EditorPreviewOptions,
@@ -1154,7 +1155,19 @@ export class EditorPage {
 			...actionsArray,
 		] );
 
-		const json = ( await response.json() ) as PublishResponseBody;
+		let json: PublishResponseBody;
+		try {
+			json = ( await response.json() ) as PublishResponseBody;
+		} catch ( error ) {
+			flakeProbe( 'publish.responseBodyUnavailable', {
+				status: response.status(),
+				method: response.request().method(),
+				url: sanitizeURLForDiagnostics( response.url() ),
+				msSincePublishResponse: publishedAtMs !== undefined ? Date.now() - publishedAtMs : null,
+				error: ( error as Error ).message,
+			} );
+			throw error;
+		}
 		// AT and Simple sites have slightly differing response from the API.
 		const publishedURL = json.link || json.body?.link;
 		if ( ! publishedURL ) {

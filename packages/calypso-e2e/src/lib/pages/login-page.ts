@@ -1,5 +1,6 @@
 import { Locator, Page, Response } from 'playwright';
 import { getCalypsoURL } from '../../data-helper';
+import { flakeProbe, capturePageState } from '../flake-probe';
 
 const selectors = {
 	continue: 'button:text("Continue"),a:text("Continue")',
@@ -66,7 +67,21 @@ export class LoginPage {
 	 */
 	async fillUsername( value: string ): Promise< Locator > {
 		const locator = await this.page.locator( 'input[name="usernameOrEmail"]' );
-		await locator.fill( value );
+		const startedAtMs = Date.now();
+		try {
+			await locator.fill( value );
+		} catch ( error ) {
+			flakeProbe( 'login.fillUsernameTimeout', {
+				elapsedMs: Date.now() - startedAtMs,
+				visible: await locator.isVisible().catch( () => null ),
+				enabled: await locator.isEnabled().catch( () => null ),
+				count: await locator.count().catch( () => null ),
+				...( await capturePageState( this.page ) ),
+				error: ( error as Error ).message,
+			} );
+			throw error;
+		}
+		flakeProbe( 'login.fillUsername', { elapsedMs: Date.now() - startedAtMs } );
 
 		return locator;
 	}

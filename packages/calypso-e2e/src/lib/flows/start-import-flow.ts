@@ -1,5 +1,6 @@
 import { Page } from 'playwright';
 import { DataHelper } from '../..';
+import { flakeProbe, capturePageState } from '../flake-probe';
 
 const selectors = {
 	// Generic
@@ -223,7 +224,17 @@ export class StartImportFlow {
 
 		await this.page.goto( DataHelper.getCalypsoURL( route, { siteSlug } ) );
 		await this.validateSetupPage();
-		await this.page.click( selectors.startImportButton );
+		const startedAtMs = Date.now();
+		try {
+			await this.page.click( selectors.startImportButton );
+		} catch ( error ) {
+			flakeProbe( 'importer.startImportButtonTimeout', {
+				elapsedMs: Date.now() - startedAtMs,
+				...( await capturePageState( this.page ) ),
+				error: ( error as Error ).message,
+			} );
+			throw error;
+		}
 	}
 
 	/**
