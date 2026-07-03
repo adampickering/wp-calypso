@@ -68,23 +68,27 @@ export class LoginPage {
 	async fillUsername( value: string ): Promise< Locator > {
 		const locator = await this.page.locator( 'input[name="usernameOrEmail"]' );
 		const startedAtMs = Date.now();
+		const probeFillFailure = async ( label: string, err: unknown ): Promise< void > =>
+			flakeProbe( label, {
+				elapsedMs: Date.now() - startedAtMs,
+				visible: await locator.isVisible().catch( () => null ),
+				enabled: await locator.isEnabled().catch( () => null ),
+				count: await locator.count().catch( () => null ),
+				...( await capturePageState( this.page ) ),
+				error: ( err as Error ).message,
+			} );
 		try {
 			await locator.fill( value );
-		} catch {
+		} catch ( firstError ) {
 			// The login input can stay disabled if the page fails to hydrate; a
-			// reload recovers it. Retry once before failing.
+			// reload recovers it. Probe the stall, then reload and retry once before
+			// failing, so reload-recoveries are counted separately from hard failures.
+			await probeFillFailure( 'login.fillUsernameDisabledReloading', firstError );
 			await this.page.reload();
 			try {
 				await locator.fill( value );
 			} catch ( error ) {
-				flakeProbe( 'login.fillUsernameTimeout', {
-					elapsedMs: Date.now() - startedAtMs,
-					visible: await locator.isVisible().catch( () => null ),
-					enabled: await locator.isEnabled().catch( () => null ),
-					count: await locator.count().catch( () => null ),
-					...( await capturePageState( this.page ) ),
-					error: ( error as Error ).message,
-				} );
+				await probeFillFailure( 'login.fillUsernameTimeout', error );
 				throw error;
 			}
 		}

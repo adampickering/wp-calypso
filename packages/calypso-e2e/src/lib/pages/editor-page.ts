@@ -1162,7 +1162,7 @@ export class EditorPage {
 						status: publishResponse.status(),
 						method: publishResponse.request().method(),
 						url: sanitizeURLForDiagnostics( publishResponse.url() ),
-						msSincePublishResponse: publishedAtMs !== undefined ? Date.now() - publishedAtMs : null,
+						msSincePublishResponse: Date.now() - publishedAtMs,
 						error: ( error as Error ).message,
 					} );
 					throw error;

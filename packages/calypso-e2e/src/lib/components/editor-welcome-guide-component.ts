@@ -32,10 +32,11 @@ export class EditorWelcomeGuideComponent {
 		const editorParent = await this.editor.parent();
 
 		const welcomGuideWrapper = editorParent.locator( selectors.welcomeGuideWrapper );
-		// The guide only shows on some editor loads. Wait briefly; if it does not
-		// appear there is nothing to close.
+		// The guide only shows on some editor loads. Keep the framework's default
+		// wait window so a slow-rendering guide is still caught, but return instead
+		// of throwing when it never appears.
 		try {
-			await welcomGuideWrapper.waitFor( { state: 'visible', timeout: 5000 } );
+			await welcomGuideWrapper.waitFor( { state: 'visible', timeout: 10000 } );
 		} catch {
 			return;
 		}
