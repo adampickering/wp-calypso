@@ -138,6 +138,14 @@ body.is-section-reader {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+			margin-left: 32px;
+		}
+
+		.sidebar__expandable-arrow {
+			background: none;
+			fill: var( --studio-gray-20 );
+			transition: transform 0.15s ease;
+			transform: rotate( -90deg );
 		}
 
 		.sidebar__expandable-content {
