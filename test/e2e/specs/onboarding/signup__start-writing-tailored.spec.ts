@@ -1,10 +1,4 @@
-import {
-	NewTestUserDetails,
-	NewUserResponse,
-	RestAPIClient,
-	flakeProbe,
-	capturePageState,
-} from '@automattic/calypso-e2e';
+import { NewTestUserDetails, NewUserResponse, RestAPIClient } from '@automattic/calypso-e2e';
 import { expect, tags, test } from '../../lib/pw-base';
 import { apiCloseAccount } from '../shared';
 
@@ -63,18 +57,7 @@ test.describe(
 			} );
 
 			await test.step( 'Then I see "Your blog\'s almost ready!" message', async function () {
-				const startedAtMs = Date.now();
-				try {
-					await expect( flowStartWriting.blogsAlmostReadyHeading ).toBeVisible();
-				} catch ( error ) {
-					flakeProbe( 'signup.launchpadHeadingTimeout', {
-						elapsedMs: Date.now() - startedAtMs,
-						...( await capturePageState( page ) ),
-						error: ( error as Error ).message,
-					} );
-					throw error;
-				}
-				flakeProbe( 'signup.launchpadHeading', { elapsedMs: Date.now() - startedAtMs } );
+				await expect( flowStartWriting.blogsAlmostReadyHeading ).toBeVisible();
 				await expect( flowStartWriting.keepUpMomentumText ).toBeVisible();
 			} );
 

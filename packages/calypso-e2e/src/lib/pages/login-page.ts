@@ -48,10 +48,18 @@ export class LoginPage {
 		await this.fillUsername( username );
 		await this.clickSubmit();
 		await this.fillPassword( password );
-		await Promise.all( [
-			this.page.waitForNavigation( { timeout: 20 * 1000 } ),
-			this.clickSubmit(),
-		] );
+		try {
+			await Promise.all( [
+				this.page.waitForNavigation( { timeout: 20 * 1000 } ),
+				this.clickSubmit(),
+			] );
+		} catch ( error ) {
+			flakeProbe( 'login.submitNavigationTimeout', {
+				...( await capturePageState( this.page ) ),
+				error: ( error as Error ).message,
+			} );
+			throw error;
+		}
 	}
 
 	/**

@@ -160,7 +160,16 @@ export class StartImportFlow {
 	 * Validates that we've landed on the importer drag page.
 	 */
 	async validateImporterDragPage( importer: string ): Promise< void > {
-		await this.page.locator( selectors.importerDrag( importer ) ).waitFor( { timeout: 60_000 } );
+		try {
+			await this.page.locator( selectors.importerDrag( importer ) ).waitFor( { timeout: 60_000 } );
+		} catch ( error ) {
+			flakeProbe( 'importer.dragPageTimeout', {
+				importer,
+				...( await capturePageState( this.page ) ),
+				error: ( error as Error ).message,
+			} );
+			throw error;
+		}
 	}
 
 	/**
@@ -224,17 +233,7 @@ export class StartImportFlow {
 
 		await this.page.goto( DataHelper.getCalypsoURL( route, { siteSlug } ) );
 		await this.validateSetupPage();
-		const startedAtMs = Date.now();
-		try {
-			await this.page.click( selectors.startImportButton );
-		} catch ( error ) {
-			flakeProbe( 'importer.startImportButtonTimeout', {
-				elapsedMs: Date.now() - startedAtMs,
-				...( await capturePageState( this.page ) ),
-				error: ( error as Error ).message,
-			} );
-			throw error;
-		}
+		await this.page.click( selectors.startImportButton );
 	}
 
 	/**
