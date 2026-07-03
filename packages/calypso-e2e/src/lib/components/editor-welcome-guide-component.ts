@@ -32,7 +32,13 @@ export class EditorWelcomeGuideComponent {
 		const editorParent = await this.editor.parent();
 
 		const welcomGuideWrapper = editorParent.locator( selectors.welcomeGuideWrapper );
-		await welcomGuideWrapper.waitFor( { state: 'visible' } );
+		// The guide only shows on some editor loads. Wait briefly; if it does not
+		// appear there is nothing to close.
+		try {
+			await welcomGuideWrapper.waitFor( { state: 'visible', timeout: 5000 } );
+		} catch {
+			return;
+		}
 
 		const closeBtn = editorParent.locator( selectors.welcomeGuideCloseButton );
 		await closeBtn.click();
