@@ -691,6 +691,25 @@ export function isCloseToExpiration( purchase: Purchase ): boolean {
 	return moment( purchase.expiryDate ).diff( Date.now(), 'months' ) < expiryThresholdInMonths;
 }
 
+const URGENT_EXPIRY_WINDOW_DAYS = 10;
+
+/**
+ * Whether a purchase is urgently expiring: already expired, or fewer than 10
+ * days from its expiry date. Day-based, distinct from the months-based
+ * isCloseToExpiration.
+ * @param {Object} purchase - the purchase with which we are concerned
+ * @returns {boolean} True if the purchase is expired or within the urgent window
+ */
+export function isUrgentlyExpiring( purchase: Purchase ): boolean {
+	if ( isExpired( purchase ) ) {
+		return true;
+	}
+	if ( ! purchase.expiryDate ) {
+		return false;
+	}
+	return moment( purchase.expiryDate ).diff( Date.now(), 'days' ) < URGENT_EXPIRY_WINDOW_DAYS;
+}
+
 /**
  * Checks if a purchase might be in the refund period, whether refundable or not.
  *

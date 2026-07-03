@@ -11,6 +11,7 @@ import {
 	handleRenewNowClick,
 	handleRenewMultiplePurchasesClick,
 	shouldRenderMonthlyRenewalOption,
+	isUrgentlyExpiring,
 } from '../index';
 import data from './data';
 const {
@@ -419,6 +420,55 @@ describe( 'index', () => {
 					} )
 				).toBe( true );
 			} );
+		} );
+	} );
+
+	describe( '#isUrgentlyExpiring', () => {
+		const purchase = {
+			id: 1,
+			currencyCode: 'USD',
+			productSlug: 'personal-bundle',
+			productName: 'Personal Plan',
+			amount: 100,
+			expiryDate: '2021-04-26T00:00:00+00:00',
+		};
+
+		test( 'is false when the purchase has no expiry date and is not expired', () => {
+			expect( isUrgentlyExpiring( { ...purchase, expiryDate: null } ) ).toBe( false );
+		} );
+
+		test( 'is true when the purchase is expired', () => {
+			expect( isUrgentlyExpiring( { ...purchase, expiryStatus: 'expired' } ) ).toBe( true );
+		} );
+
+		test( 'is true when the purchase expires within the urgent window', () => {
+			expect(
+				isUrgentlyExpiring( { ...purchase, expiryDate: moment().add( 5, 'days' ).format() } )
+			).toBe( true );
+		} );
+
+		test( 'is true just inside the urgent window', () => {
+			expect(
+				isUrgentlyExpiring( { ...purchase, expiryDate: moment().add( 9, 'days' ).format() } )
+			).toBe( true );
+		} );
+
+		test( 'is false just outside the urgent window', () => {
+			expect(
+				isUrgentlyExpiring( { ...purchase, expiryDate: moment().add( 11, 'days' ).format() } )
+			).toBe( false );
+		} );
+
+		test( 'is false when the purchase expires well beyond the urgent window', () => {
+			expect(
+				isUrgentlyExpiring( { ...purchase, expiryDate: moment().add( 30, 'days' ).format() } )
+			).toBe( false );
+		} );
+
+		test( 'is true when the purchase is past expiry but not yet marked expired', () => {
+			expect(
+				isUrgentlyExpiring( { ...purchase, expiryDate: moment().subtract( 3, 'days' ).format() } )
+			).toBe( true );
 		} );
 	} );
 } );

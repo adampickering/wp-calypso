@@ -2,18 +2,27 @@ import { isPlan, isDomainRegistration } from '@automattic/calypso-products';
 import { Button } from '@automattic/components';
 import styled from '@emotion/styled';
 import { useTranslate } from 'i18n-calypso';
-import { FunctionComponent, useMemo, useCallback, useState } from 'react';
+import { FunctionComponent, useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import { dismissCard } from 'calypso/blocks/dismissible-card/actions';
+import { isCardDismissed } from 'calypso/blocks/dismissible-card/selectors';
 import QueryUserPurchases from 'calypso/components/data/query-user-purchases';
 import { useLocalizedMoment } from 'calypso/components/localized-moment';
 import SectionHeader from 'calypso/components/section-header';
 import TrackComponentView from 'calypso/lib/analytics/track-component-view';
 import { getRenewalItemFromProduct } from 'calypso/lib/cart-values/cart-items';
-import { getName, isExpired, isRenewing, isInExpirationGracePeriod } from 'calypso/lib/purchases';
+import {
+	getName,
+	isExpired,
+	isRenewing,
+	isInExpirationGracePeriod,
+	isUrgentlyExpiring,
+} from 'calypso/lib/purchases';
 import UpcomingRenewalsDialog from 'calypso/me/purchases/upcoming-renewals/upcoming-renewals-dialog';
 import { PartialCart } from 'calypso/my-sites/checkout/src/components/secondary-cart-promotions';
 import { useSelector, useDispatch } from 'calypso/state';
 import { recordTracksEvent } from 'calypso/state/analytics/actions';
 import { getCurrentUserId } from 'calypso/state/current-user/selectors';
+import { hasReceivedRemotePreferences } from 'calypso/state/preferences/selectors';
 import {
 	getRenewableSitePurchases,
 	hasLoadedUserPurchasesFromServer,
@@ -79,7 +88,32 @@ const UpcomingRenewalsReminder: FunctionComponent< Props > = ( { cart, addItemTo
 		[ renewableSitePurchases, purchasesIdsAlreadyInCart ]
 	);
 
+	const urgentPurchases = useMemo(
+		() => renewablePurchasesNotAlreadyInCart.filter( isUrgentlyExpiring ),
+		[ renewablePurchasesNotAlreadyInCart ]
+	);
+
+	// Per-urgent-set dismissal key: a genuinely new urgent purchase yields a new
+	// key and re-notifies. dismissCard prefixes it with `dismissible-card-`.
+	const dismissPreferenceName = useMemo(
+		() =>
+			`checkout-urgent-renewals-${ urgentPurchases
+				.map( ( purchase ) => purchase.id )
+				.sort( ( a, b ) => a - b )
+				.join( '-' ) }`,
+		[ urgentPurchases ]
+	);
+	const isUrgentSetDismissed = useSelector( isCardDismissed( dismissPreferenceName ) );
+
+	// Preferences load async and independently of purchases; until they arrive
+	// isCardDismissed reads falsy, so a dismissed set would auto-open again on a
+	// fresh session. Gate the effect the way DismissibleCard does.
+	const arePreferencesLoaded = useSelector( hasReceivedRemotePreferences );
+
 	const [ isUpcomingRenewalsDialogVisible, setUpcomingRenewalsDialogVisible ] = useState( false );
+
+	// 'urgent' = auto-opened for the urgent subset; 'all' = manual "other upgrades" link.
+	const [ dialogVariant, setDialogVariant ] = useState< 'urgent' | 'all' >( 'all' );
 
 	const addPurchasesToCart = useCallback(
 		( purchases: Purchase[] ) => {
@@ -123,10 +157,48 @@ const UpcomingRenewalsReminder: FunctionComponent< Props > = ( { cart, addItemTo
 
 	const onClose = useCallback( () => {
 		setUpcomingRenewalsDialogVisible( false );
-	}, [ setUpcomingRenewalsDialogVisible ] );
+		if ( dialogVariant === 'urgent' ) {
+			reduxDispatch( dismissCard( dismissPreferenceName ) );
+			reduxDispatch( recordTracksEvent( 'calypso_checkout_urgent_renewals_modal_dismiss' ) );
+		}
+	}, [ dialogVariant, dismissPreferenceName, reduxDispatch ] );
+
+	const openAllPurchasesDialog = useCallback( () => {
+		setDialogVariant( 'all' );
+		setUpcomingRenewalsDialogVisible( true );
+	}, [] );
 
 	const arePurchasesLoaded = useSelector( hasLoadedUserPurchasesFromServer );
 	const userId = useSelector( getCurrentUserId );
+
+	const hasAutoOpened = useRef( false );
+	useEffect( () => {
+		if (
+			hasAutoOpened.current ||
+			! arePurchasesLoaded ||
+			! arePreferencesLoaded ||
+			renewablePurchasesNotAlreadyInCart.length === 0 ||
+			urgentPurchases.length === 0 ||
+			isUrgentSetDismissed
+		) {
+			return;
+		}
+		hasAutoOpened.current = true;
+		setDialogVariant( 'urgent' );
+		setUpcomingRenewalsDialogVisible( true );
+		reduxDispatch(
+			recordTracksEvent( 'calypso_checkout_urgent_renewals_modal_impression', {
+				urgent_count: urgentPurchases.length,
+			} )
+		);
+	}, [
+		arePurchasesLoaded,
+		arePreferencesLoaded,
+		renewablePurchasesNotAlreadyInCart,
+		urgentPurchases,
+		isUrgentSetDismissed,
+		reduxDispatch,
+	] );
 
 	if ( ! userId || ! selectedSite ) {
 		return null;
@@ -138,9 +210,12 @@ const UpcomingRenewalsReminder: FunctionComponent< Props > = ( { cart, addItemTo
 		translate,
 		moment,
 		selectedSite,
-		setUpcomingRenewalsDialogVisible,
+		setUpcomingRenewalsDialogVisible: openAllPurchasesDialog,
 		renewablePurchasesNotAlreadyInCart,
 	} );
+
+	const dialogPurchases =
+		dialogVariant === 'urgent' ? urgentPurchases : renewablePurchasesNotAlreadyInCart;
 
 	return (
 		<>
@@ -149,7 +224,7 @@ const UpcomingRenewalsReminder: FunctionComponent< Props > = ( { cart, addItemTo
 				<div className="cart__upsell-wrapper">
 					<UpcomingRenewalsDialog
 						isVisible={ isUpcomingRenewalsDialogVisible }
-						purchases={ renewablePurchasesNotAlreadyInCart }
+						purchases={ dialogPurchases }
 						site={ selectedSite }
 						onConfirm={ onConfirm }
 						onClose={ onClose }
