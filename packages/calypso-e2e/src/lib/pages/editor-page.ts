@@ -1131,7 +1131,7 @@ export class EditorPage {
 
 		// Resolve the promises.
 		let publishedAtMs: number | undefined;
-		const [ response ] = await Promise.all( [
+		const [ { response, json } ] = await Promise.all( [
 			// First URL matches Atomic requests while the second matches Simple requests.
 			Promise.race( [
 				this.page.waitForResponse(
@@ -1146,28 +1146,30 @@ export class EditorPage {
 						response.request().method() === 'PUT',
 					{ timeout: timeout }
 				),
-			] ).then( ( publishResponse ) => {
-				// Captured the moment the publish response arrives, before the remaining
-				// publish-panel actions settle, so the probe measures the full window.
+			] ).then( async ( publishResponse ) => {
 				publishedAtMs = Date.now();
-				return publishResponse;
+				// Read the body the moment the response lands, before the flow can navigate
+				// away. Playwright fetches the body lazily over CDP, so in publish-then-navigate
+				// flows (e.g. start-writing redirects to the launchpad on publish) a deferred
+				// response.json() races the navigation, which evicts the network resource and
+				// fails with "No resource with given identifier found". Reading here, rather than
+				// after the publish-panel actions settle, closes that window.
+				try {
+					const parsed = ( await publishResponse.json() ) as PublishResponseBody;
+					return { response: publishResponse, json: parsed };
+				} catch ( error ) {
+					flakeProbe( 'publish.responseBodyUnavailable', {
+						status: publishResponse.status(),
+						method: publishResponse.request().method(),
+						url: sanitizeURLForDiagnostics( publishResponse.url() ),
+						msSincePublishResponse: publishedAtMs !== undefined ? Date.now() - publishedAtMs : null,
+						error: ( error as Error ).message,
+					} );
+					throw error;
+				}
 			} ),
 			...actionsArray,
 		] );
-
-		let json: PublishResponseBody;
-		try {
-			json = ( await response.json() ) as PublishResponseBody;
-		} catch ( error ) {
-			flakeProbe( 'publish.responseBodyUnavailable', {
-				status: response.status(),
-				method: response.request().method(),
-				url: sanitizeURLForDiagnostics( response.url() ),
-				msSincePublishResponse: publishedAtMs !== undefined ? Date.now() - publishedAtMs : null,
-				error: ( error as Error ).message,
-			} );
-			throw error;
-		}
 		// AT and Simple sites have slightly differing response from the API.
 		const publishedURL = json.link || json.body?.link;
 		if ( ! publishedURL ) {
