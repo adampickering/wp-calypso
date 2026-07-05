@@ -237,6 +237,16 @@ export default function OrchestratorChat( {
 		async ( message: string ) => {
 			setHasUserSentMessage( true );
 			persistLastActivity( siteKey );
+			// Clear the "fresh session" flag the moment the first send STARTS, for
+			// every client-persisted surface (reader-chat AND the storefront
+			// shopper), so a subsequent reload knows there may be a conversation to
+			// fetch. Clearing only after the round-trip resolves left the flag
+			// stuck "fresh" when the first reply was aborted mid-stream (page
+			// navigation, network error) even though the server had already stored
+			// the conversation — every later load then skipped restoring it.
+			if ( usesLocalStatePersistence( agentConfig?.agentId ) ) {
+				markSessionUsed( agentConfig?.agentId );
+			}
 
 			recordBigSkyTracksEvent( 'chat_input_send_message', {
 				message_length: message?.length || 0,
@@ -281,14 +291,6 @@ export default function OrchestratorChat( {
 				await onSubmit( message );
 			}
 			consumeNextMessageExternalContextEntries();
-			// Clear the "fresh session" flag after the first round-trip for every
-			// client-persisted surface (reader-chat AND the storefront shopper), so a
-			// subsequent reload knows there's a conversation to fetch. Gating this on
-			// reader-chat alone would leave the storefront's flag stuck "fresh" and it
-			// would never restore.
-			if ( usesLocalStatePersistence( agentConfig?.agentId ) ) {
-				markSessionUsed( agentConfig?.agentId );
-			}
 		},
 		[ agentConfig?.agentId, onSubmit, pendingImages.length, siteKey, uploadImagesToWordPress ]
 	);
