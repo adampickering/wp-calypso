@@ -98,6 +98,6 @@
 		"mockdate": "^2.0.5",
 		"postcss": "^8.5.15",
 		"typescript": "^6.0.3",
-		"webpack": "^5.99.8"
+		"webpack": "^5.108.1"
 	}
 }

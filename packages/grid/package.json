@@ -39,7 +39,7 @@
 		"postcss": "^8.5.15",
 		"storybook": "^9.1.20",
 		"typescript": "^6.0.3",
-		"webpack": "^5.99.8"
+		"webpack": "^5.108.1"
 	},
 	"peerDependencies": {
 		"react": "^18.0.0 || ^19.0.0",
