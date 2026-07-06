@@ -214,7 +214,7 @@ export const MarketplaceFooter = () => {
 		{
 			ref: sectionName + '-lp',
 		},
-		sectionName === 'plugins' ? '/start/business' : '/start'
+		sectionName === 'plugins' ? '/setup/plugins' : '/start'
 	);
 
 	const headerTitle = isMarketplaceRedesignEnabled

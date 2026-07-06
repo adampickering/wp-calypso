@@ -43,6 +43,7 @@ export const PLAN_UPGRADE_FLOW = 'plan-upgrade';
 export const FLEX_SITE_FLOW = 'flex-site';
 export const WOO_HOSTED_PLANS_FLOW = 'woo-hosted-plans';
 export const ART_PROMO_FLOW = 'art-domain';
+export const PLUGINS_FLOW = 'plugins';
 
 export const isNewsletterFlow = ( flowName: string | null | undefined ) => {
 	return Boolean( flowName && NEWSLETTER_FLOW === flowName );

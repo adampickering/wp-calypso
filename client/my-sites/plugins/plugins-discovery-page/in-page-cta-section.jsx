@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { useI18n } from '@wordpress/react-i18n';
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import videoImage from 'calypso/assets/images/marketplace/plugins-video.jpg';
+import videoImage from 'calypso/assets/images/marketplace/plugins-video.webp';
 import WPLogo from 'calypso/assets/images/marketplace/wp-logo.svg';
 import Section, {
 	SectionContainer,
@@ -120,7 +120,7 @@ const InPageCTASection = () => {
 		{
 			ref: sectionName + '-lp',
 		},
-		'/start/business'
+		'/setup/plugins'
 	);
 
 	const trackCTAClick = useCallback( () => {

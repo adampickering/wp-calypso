@@ -23,6 +23,7 @@ import {
 	ART_PROMO_FLOW,
 	DIRECT_TO_CART_FLOW,
 	WRITE_ON_FLOW,
+	PLUGINS_FLOW,
 } from '@automattic/onboarding';
 import type { Flow, FlowV2 } from '../declarative-flow/internals/types';
 
@@ -37,6 +38,9 @@ const availableFlows: Record< string, () => Promise< { default: FlowV2< any > } 
 
 	[ ONBOARDING_FLOW ]: () =>
 		import( /* webpackChunkName: "onboarding-flow" */ './flows/onboarding/onboarding' ),
+
+	[ PLUGINS_FLOW ]: () =>
+		import( /* webpackChunkName: "plugins-flow" */ './flows/plugins/plugins' ),
 
 	[ SITE_MIGRATION_FLOW ]: () =>
 		import(
