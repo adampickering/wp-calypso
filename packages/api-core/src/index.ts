@@ -4,6 +4,8 @@ export * from './error';
 
 export * from './admin-bar';
 export * from './agency';
+export * from './agency-sites';
+export * from './agency-woopayments';
 export * from './akismet-api-key';
 export * from './big-sky-plugin';
 export * from './cancellation-offers';
@@ -36,6 +38,7 @@ export * from './geo';
 export * from './hosting-github';
 export * from './hosting-update-schedules';
 export * from './jetpack-agency-sites';
+export * from './jetpack-licenses';
 export * from './jetpack-user-license';
 export * from './logstash';
 export * from './marketplace-products';
