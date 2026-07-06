@@ -56,7 +56,7 @@ Write-Output "--- :yarn: Installing desktop dependencies"
 Invoke-Checked { yarn install --immutable --inline-builds }
 
 # Every non-empty string is truthy in PowerShell, so match the literal 'true'
-# rather than mere presence — otherwise FORCE_PFX_SIGNING='false' would select PFX.
+# rather than mere presence.
 if ($env:FORCE_PFX_SIGNING -eq 'true') {
     # Fallback: materialize the org Sectigo cert from AWS Secrets Manager (writes
     # certificate.pfx; WINDOWS_CODE_SIGNING_CERT_PASSWORD is the matching

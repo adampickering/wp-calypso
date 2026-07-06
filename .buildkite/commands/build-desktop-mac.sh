@@ -36,8 +36,8 @@ corepack enable
 yarn install --immutable --inline-builds
 
 # Platform-agnostic unit tests (signing routing/arg logic). Run before the heavy
-# signed build so a logic regression fails in seconds. This is the only desktop
-# step that runs on trunk, so it also guards post-merge.
+# signed build to fail early. This is the only desktop step that runs on trunk, so it
+# also guards post-merge.
 yarn run test:unit
 
 bundle install
