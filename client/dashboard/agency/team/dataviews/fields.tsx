@@ -1,6 +1,7 @@
 import { Badge } from '@automattic/ui';
 import {
 	__experimentalHStack as HStack,
+	__experimentalText as Text,
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { dateI18n } from '@wordpress/date';
@@ -53,7 +54,7 @@ function MemberCell( { member }: { member: TeamMember } ) {
 			) }
 			<VStack spacing={ 0 } className="agency-team-member__details">
 				<span className="agency-team-member__name">{ name }</span>
-				<span className="agency-team-member__email">{ member.email }</span>
+				<Text variant="muted">{ member.email }</Text>
 			</VStack>
 		</HStack>
 	);

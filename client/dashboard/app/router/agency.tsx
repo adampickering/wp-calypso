@@ -187,6 +187,7 @@ export const agencyTeamRoute = createRoute( {
 	} ),
 	getParentRoute: () => agencyRoute,
 	path: 'team',
+	loader: () => queryClient.ensureQueryData( rawUserPreferencesQuery() ),
 } ).lazy( () =>
 	import( '../../agency/team' ).then( ( d ) =>
 		createLazyRoute( 'agency-team' )( {

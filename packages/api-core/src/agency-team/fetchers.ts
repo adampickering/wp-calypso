@@ -43,7 +43,6 @@ export async function resendAgencyTeamInvite(
 	return wpcom.req.post( {
 		path: `/agency/${ agencyId }/user-invites/${ inviteId }/resend`,
 		apiNamespace: 'wpcom/v2',
-		method: 'POST',
 	} );
 }
 
