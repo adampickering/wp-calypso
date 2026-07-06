@@ -93,13 +93,15 @@ export default function TeamList() {
 				</LayoutHeader>
 			</LayoutTop>
 			<LayoutBody>
-				<TeamMembersContent
-					members={ members }
-					actions={ actions }
-					view={ view }
-					onChangeView={ setView }
-					onReset={ () => setView( { ...DEFAULT_VIEW } ) }
-				/>
+				<div className="redesigned-a8c-table">
+					<TeamMembersContent
+						members={ members }
+						actions={ actions }
+						view={ view }
+						onChangeView={ setView }
+						onReset={ () => setView( { ...DEFAULT_VIEW } ) }
+					/>
+				</div>
 			</LayoutBody>
 
 			{ activeRequest && (

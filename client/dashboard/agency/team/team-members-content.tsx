@@ -1,4 +1,5 @@
-import { filterSortAndPaginate } from '@wordpress/dataviews';
+import { __experimentalHStack as HStack } from '@wordpress/components';
+import { DataViews as WPDataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
 import { DataViews, DataViewsCard, DataViewsEmptyStateLayout } from '../../components/dataviews';
 import { useTeamFields } from './dataviews/fields';
@@ -42,7 +43,6 @@ export default function TeamMembersContent( {
 				onChangeView={ onChangeView }
 				onReset={ onReset }
 				isLoading={ isLoading }
-				search
 				paginationInfo={ paginationInfo }
 				getItemId={ getTeamMemberId }
 				defaultLayouts={ DEFAULT_LAYOUTS }
@@ -58,7 +58,25 @@ export default function TeamMembersContent( {
 						}
 					/>
 				}
-			/>
+			>
+				{ /* Free composition: render our own toolbar so search + cog live in a
+				   wrapper we control (styling/alignment) instead of DataViews' default. */ }
+				<HStack
+					className="agency-team-members__view-actions"
+					alignment="top"
+					justify="space-between"
+					spacing={ 2 }
+				>
+					<HStack justify="flex-start" spacing={ 3 } expanded={ false }>
+						<WPDataViews.Search />
+						<WPDataViews.FiltersToggle />
+					</HStack>
+					<WPDataViews.ViewConfig />
+				</HStack>
+				<WPDataViews.FiltersToggled />
+				<WPDataViews.Layout />
+				<WPDataViews.Footer />
+			</DataViews>
 		</DataViewsCard>
 	);
 }
