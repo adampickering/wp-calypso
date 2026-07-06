@@ -180,6 +180,21 @@ export const agencySitesRoute = createRoute( {
 	)
 );
 
+// `/team` – manage agency team members and invitations
+export const agencyTeamRoute = createRoute( {
+	head: () => ( {
+		meta: [ { title: __( 'Team' ) } ],
+	} ),
+	getParentRoute: () => agencyRoute,
+	path: 'team',
+} ).lazy( () =>
+	import( '../../agency/team' ).then( ( d ) =>
+		createLazyRoute( 'agency-team' )( {
+			component: d.default,
+		} )
+	)
+);
+
 // `/earn` – summary of the agency's earning programs (default Earn screen)
 const earnOverviewRoute = createRoute( {
 	head: () => ( { meta: [ { title: __( 'Overview' ) } ] } ),
@@ -243,6 +258,7 @@ export const createAgencyRoutes = () => [
 		learnRoute,
 		mcpRoute.addChildren( [ mcpOverviewRoute, mcpAvailableToolsRoute, mcpConnectRoute ] ),
 		agencySitesRoute,
+		agencyTeamRoute,
 		earnOverviewRoute,
 		earnReferralsRoute,
 		earnWooPaymentsRoute,
