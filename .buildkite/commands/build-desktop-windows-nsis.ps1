@@ -55,7 +55,9 @@ $env:PLAYWRIGHT_SKIP_DOWNLOAD = 'true'
 Write-Output "--- :yarn: Installing desktop dependencies"
 Invoke-Checked { yarn install --immutable --inline-builds }
 
-if ($env:FORCE_PFX_SIGNING) {
+# Every non-empty string is truthy in PowerShell, so match the literal 'true'
+# rather than mere presence — otherwise FORCE_PFX_SIGNING='false' would select PFX.
+if ($env:FORCE_PFX_SIGNING -eq 'true') {
     # Fallback: materialize the org Sectigo cert from AWS Secrets Manager (writes
     # certificate.pfx; WINDOWS_CODE_SIGNING_CERT_PASSWORD is the matching
     # password, already on the windows queue). bin/windows-sign.js signs with
@@ -117,6 +119,9 @@ function Assert-Signed {
 
 Write-Output "--- :mag: Verifying signatures on packed binaries"
 $unpacked = @(Get-ChildItem -Path release -Directory -Filter 'win*-unpacked')
+if ($unpacked.Count -eq 0) {
+    throw "No win*-unpacked directory in desktop/release - native-binary signing was never verified."
+}
 foreach ($dir in $unpacked) {
     $binaries = @(Get-ChildItem -Path $dir.FullName -Recurse -Include '*.exe', '*.node', '*.dll' -File)
     Assert-Signed -Binaries $binaries -Label $dir.Name
